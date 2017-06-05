@@ -9,13 +9,6 @@ class General():
 
     def __init__(self, bot):
         self.bot = bot
-
-    @commands.command(description="Tells you your user ID.", pass_context=True)
-    async def get_id(self, context):
-        user_id = context.message.author.id
-        user_name = context.message.author.name
-        await self.bot.send_message(context.message.channel,
-                                    "{}, your ID is {}".format(user_name, user_id))
         
     @commands.command(description="D:", pass_context=True)
     async def shutdown(self, context):
@@ -24,3 +17,18 @@ class General():
             await self.bot.logout()
         else:
             await self.bot.send_message(context.message.channel, "Don't tell me what to do.")
+
+class Debugging():
+    """Commands for debugging and testing."""
+
+    def __init__(self, bot):
+        self.bot = bot
+
+    @commands.command(description="Tells you your user ID.", pass_context=True)
+    async def getid(self, context):
+        user_id = context.message.author.id
+        user_name = context.message.author.mention
+        
+        await self.bot.send_message(context.message.channel,
+                                    "{}, your ID is {}".format(user_name, user_id))
+
