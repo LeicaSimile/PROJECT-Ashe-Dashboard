@@ -18,6 +18,8 @@ async def on_ready():
     print("{} is now online.".format(bot.user.name))
     print("ID: {}".format(bot.user.id))
     print("Command prefix: {}".format(BOT_PREFIX))
+    
+    await bot.change_presence(game=discord.Game(name="DDR"))
 
 @bot.command(description="D:", pass_context=True)
 async def shutdown(context):
