@@ -1,10 +1,11 @@
 # -*- coding: utf-8 -*-
 import configparser
 import discord
-from discord.ext.commands import Bot
 from discord.ext import commands
 
-BOT_PREFIX = "ashe-"
+from bot.commands import general
+
+BOT_PREFIX = "ashe:"
 FILE_CONFIG = "config.ini"
 
 bot = commands.Bot(command_prefix=BOT_PREFIX, description=":D?", pm_help=True)
@@ -19,12 +20,8 @@ async def on_ready():
     print("ID: {}".format(bot.user.id))
     print("Command prefix: {}".format(BOT_PREFIX))
     
-    await bot.change_presence(game=discord.Game(name="DDR"))
-
-@bot.command(description="D:", pass_context=True)
-async def shutdown(context):
-    await bot.send_message(context.message.channel, "Shutting down.")
-    await bot.logout()
+    await bot.change_presence(game=discord.Game(name="DDR | {}help".format(BOT_PREFIX)))
+    bot.add_cog(general.General(bot))
 
 
 def main():
