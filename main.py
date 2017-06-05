@@ -25,7 +25,12 @@ async def on_ready():
 
     add_commands()
     await bot.change_presence(game=discord.Game(name="DDR | {}help".format(settings.BOT_PREFIX)))
-    
+
+@bot.event
+async def on_member_join(member):
+    server = member.server
+    await bot.send_message(server, 'Salvation, bit by bit. Good to have you on our side, {0.mention}'.format(member))
+
 
 def main():
     bot.run(settings.TOKEN)
