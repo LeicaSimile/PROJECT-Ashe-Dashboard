@@ -19,5 +19,8 @@ class General():
         
     @commands.command(description="D:", pass_context=True)
     async def shutdown(self, context):
-        await self.bot.send_message(context.message.channel, "Shutting down.")
-        await self.bot.logout()
+        if context.message.author.id == settings.OWNER_ID:
+            await self.bot.send_message(context.message.channel, "Shutting down.")
+            await self.bot.logout()
+        else:
+            await self.bot.send_message(context.message.channel, "Don't tell me what to do.")
