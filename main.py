@@ -8,11 +8,9 @@ from bot.commands import general
 from bot.commands import music
 import settings
 
-
-bot = commands.Bot(command_prefix=settings.BOT_PREFIX, description=":D?", pm_help=None)
-
 logging.config.fileConfig("logging.ini")
 logger = logging.getLogger("main")
+bot = commands.Bot(command_prefix=settings.BOT_PREFIX, description="For humanity!", pm_help=None)
 
 def add_commands():
     bot.add_cog(general.General(bot))
