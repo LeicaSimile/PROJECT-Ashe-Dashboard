@@ -3,15 +3,17 @@ import discord
 from discord.ext import commands
 
 from bot.commands import general
+from bot.commands import music
 import settings
 
 
-bot = commands.Bot(command_prefix=settings.BOT_PREFIX, description=":D?", pm_help=True)
+bot = commands.Bot(command_prefix=settings.BOT_PREFIX, description=":D?", pm_help=None)
 
 
 def add_commands():
     bot.add_cog(general.General(bot))
     bot.add_cog(general.Debugging(bot))
+    bot.add_cog(music.Music(bot))
 
 @bot.event
 async def on_ready():

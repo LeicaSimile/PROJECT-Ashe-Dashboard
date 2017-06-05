@@ -10,13 +10,14 @@ class General():
     def __init__(self, bot):
         self.bot = bot
         
-    @commands.command(description="D:", pass_context=True)
+    @commands.command(pass_context=True)
     async def shutdown(self, context):
         if context.message.author.id == settings.OWNER_ID:
             await self.bot.send_message(context.message.channel, "Shutting down.")
             await self.bot.logout()
         else:
             await self.bot.send_message(context.message.channel, "Don't tell me what to do.")
+
 
 class Debugging():
     """Commands for debugging and testing."""
