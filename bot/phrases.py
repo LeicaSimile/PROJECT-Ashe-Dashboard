@@ -4,11 +4,13 @@ import os.path
 import random
 import re
 import sqlite3
+from enum import Enum
 
 import settings
 
 FILE_DATABASE = "database/project-ashe.db"
-
+logging.config.fileConfig("logging.ini")
+logger = logging.getLogger("phrases")
 
 ## === Functions === ##
 def clean(line):
@@ -80,7 +82,7 @@ def parse_choices(text):
     """
     OPEN_CHAR = setting.OPEN_CHOOSE
     CLOSE_CHAR = setting.CLOSE_CHOOSE
-    ESCAPE_CHAR = setting.ESCAPE
+    ESCAPE_CHAR = setting.ESCAPE_CHAR
     SPLITTER = setting.SPLIT_CHOOSE
     done = False
 
@@ -247,6 +249,14 @@ def titlecase(s):
 
 
 ## === Classes === ##
+class Category(Enum):
+    """Categories in the database"""
+    WELCOME_SERVER = "1"
+    SHUTDOWN = "2"
+    LEFT_SERVER = "3"
+    ONLINE = "4"
+
+    
 class Database(object):
     """ For reading and parsing lines in a SQLite database.
 
@@ -435,9 +445,8 @@ class Database(object):
 
 def test():
     d = Database(FILE_DATABASE)
-    print(d.random_line("phrase", "phrases"))
-    print(d.get_ids("phrases"))
-    print(parse_cases("[upper][sencase]hey look at me i'm edgy oooo[/sencase][/upper]"))
+    print(Category.WELCOME_SERVER.value)
+    print(d.random_line("phrase", "phrases", {"category_id": Category.WELCOME_SERVER.value}))
 
 if "__main__" == __name__:
     test()
