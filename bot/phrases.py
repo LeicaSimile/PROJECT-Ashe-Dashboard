@@ -357,19 +357,26 @@ class Database(object):
             clause = "WHERE ("
             clause_list = [clause,]
             substitutes = []
-            catCount = 1
-            headerCount = 1
+            cat_count = 1
+            header_count = 1
 
             ## TODO: Add ability to specify comparison operator (e.g. =, <, LIKE, etc.)
             for con in conditions:
-                if 1 < headerCount:
+                if 1 < header_count:
                     clause_list.append(" AND (")
 
-                
+                sub_count = 1
+                subconditions = conditions[con].split(splitter)
+                for sub in subconditions:
+                    if 1 < sub_count:
+                        clause_list.append(" OR ")
+                    
+                    clause_list.append("{}='{}'".format(con, sub))
+                    sub_count += 2
                     
                 clause_list.append(")")
-                headerCount += 2
-                catCount = 1
+                header_count += 2
+                cat_count = 1
 
             clause = "".join(clause_list)
 
@@ -419,8 +426,6 @@ class Database(object):
             if ids:
                 line = random.choice(ids)
                 line = self.get_field(line, header, table)
-            else:
-                line = ""
         else:
             c.execute("SELECT {} FROM {} ORDER BY Random() LIMIT 1".format(header, table))  # TODO: Take categories into account.
             line = c.fetchone()[0]
