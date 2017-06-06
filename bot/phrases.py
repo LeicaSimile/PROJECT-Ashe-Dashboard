@@ -381,7 +381,8 @@ class Database(object):
                     if 1 < sub_count:
                         clause_list.append(" OR ")
                     
-                    clause_list.append("{}='{}'".format(con, sub))
+                    clause_list.append("{}=?".format(clean(con)))
+                    substitutes.append(sub)
                     sub_count += 2
                     
                 clause_list.append(")")
@@ -445,8 +446,7 @@ class Database(object):
 
 def test():
     d = Database(FILE_DATABASE)
-    print(Category.WELCOME_SERVER.value)
-    print(d.random_line("phrase", "phrases", {"category_id": Category.WELCOME_SERVER.value}))
+    print(d.random_line("phrase", "phrases", {"category_id": "{},{}".format(Category.WELCOME_SERVER.value, Category.SHUTDOWN.value)}))
 
 if "__main__" == __name__:
     test()
