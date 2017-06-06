@@ -335,10 +335,9 @@ class Database(object):
 
         Args:
             table(unicode): Name of table to look into.
-            conditions(list, optional): Categories you want to filter the line by.
-                [("header of categories 1", "=", "category1",) "header of category 2": "category3"]
+            conditions(list, optional): Categories you want to filter the line by, formatted like so:
+                {"header of categories 1": "category1,category2", "header of category 2": "category3"}
                 Multiple categories under a single header are separated with a comma.
-                If categories are provided, the line must match at least one category in each header.
 
         Returns:
             ids(list): List of IDs that match the categories.
@@ -403,13 +402,13 @@ class Database(object):
 
         return ids
 
-    def random_line(self, header, table, category=None, splitter=","):
+    def random_line(self, header, table, conditions=None, splitter=","):
         """ Chooses a random line from the table under the header.
 
         Args:
             header(unicode): The header of the column where you want a random line from.
             table(unicode): Name of the table to look into.
-            category(dict, optional): Categories you want to filter the line by, formatted like so:
+            conditions(dict, optional): Categories you want to filter the line by, formatted like so:
                 {"header of categories 1": "category1,category2", "header of category 2": "category3"}
                 Multiple categories under a single header are separated with a comma.
             splitter(unicode, optional): What separates multiple categories (default is a comma).
@@ -432,8 +431,8 @@ class Database(object):
         connection = sqlite3.connect(self.db)
         c = connection.cursor()
 
-        if category:
-            ids = self.get_ids(table, category, splitter)
+        if conditions:
+            ids = self.get_ids(table, conditions, splitter)
             if ids:
                 line = random.choice(ids)
                 line = self.get_field(line, header, table)
