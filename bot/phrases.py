@@ -80,10 +80,10 @@ def parse_choices(text):
         I would like some <cupcakes|ice cream>, thanks.
         I would like some cupcakes, thanks.
     """
-    OPEN_CHAR = setting.OPEN_CHOOSE
-    CLOSE_CHAR = setting.CLOSE_CHOOSE
-    ESCAPE_CHAR = setting.ESCAPE_CHAR
-    SPLITTER = setting.SPLIT_CHOOSE
+    OPEN_CHAR = settings.OPEN_CHOOSE
+    CLOSE_CHAR = settings.CLOSE_CHOOSE
+    ESCAPE_CHAR = settings.ESCAPE_CHAR
+    SPLITTER = settings.SPLIT_CHOOSE
     done = False
 
     while not done:
@@ -445,7 +445,9 @@ class Database(object):
 
 def test():
     d = Database(FILE_DATABASE)
-    print(d.random_line("phrase", "phrases", {"category_id": "{},{}".format(Category.WELCOME_SERVER.value, Category.SHUTDOWN.value)}))
+    phrase = d.random_line("phrase", "phrases", {"category_id": "{},{}".format(Category.WELCOME_SERVER.value, Category.SHUTDOWN.value)})
+    print(phrase)
+    print(parse_all(phrase))
 
 if "__main__" == __name__:
     test()
