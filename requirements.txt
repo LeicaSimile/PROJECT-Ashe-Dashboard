@@ -1,3 +1,2 @@
-# Required Python libraries
-discord
-youtube_dl
+discord==0.16.8
+youtube_dl==2017.06.12
