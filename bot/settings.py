@@ -12,11 +12,14 @@ logging.config.fileConfig(FILE_LOG)
 logger = logging.getLogger("phrases")
 logger.debug(os.path.abspath(FILE_LOG))
 
-"""Settings from config file"""
 config = configparser.SafeConfigParser()
 config.read(FILE_CONFIG)
 
+
+"""Settings from config file"""
+BOT_ID = config.get("info", "id")
 OWNER_ID = config.get("info", "owner-id")
+SECRET = config.get("info", "secret")
 TOKEN = config.get("info", "token")
 
 """Placeholders for variables in phrases"""
