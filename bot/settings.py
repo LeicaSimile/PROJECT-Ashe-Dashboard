@@ -1,8 +1,16 @@
 # -*- coding: utf-8 -*-
 import configparser
+import logging
+import logging.config
+import os.path
 
 BOT_PREFIX = "ashe:"
-FILE_CONFIG = "config.ini"
+FILE_CONFIG = os.path.join(os.path.dirname(__file__), "config.ini")
+FILE_LOG = os.path.join(os.path.dirname(__file__), "logging.ini")
+
+logging.config.fileConfig(FILE_LOG)
+logger = logging.getLogger("phrases")
+logger.debug(os.path.abspath(FILE_LOG))
 
 """Settings from config file"""
 config = configparser.SafeConfigParser()
