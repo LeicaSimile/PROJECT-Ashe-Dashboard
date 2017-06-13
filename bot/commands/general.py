@@ -5,7 +5,7 @@ import settings
 import phrases
 
 
-class General():
+class General(object):
     """General commands."""
 
     def __init__(self, bot):
@@ -25,7 +25,7 @@ class General():
             await self.bot.client.send_message(context.message.channel, "Don't tell me what to do.")
 
 
-class Debugging():
+class Debugging(object):
     """Commands for debugging and testing."""
 
     def __init__(self, bot):
