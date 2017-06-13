@@ -22,6 +22,9 @@ OWNER_ID = config.get("info", "owner-id")
 SECRET = config.get("info", "secret")
 TOKEN = config.get("info", "token")
 
+"""Files"""
+FILE_DATABASE = "database/project-ashe.db"
+
 """Placeholders for variables in phrases"""
 DISPLAY_NAME = "%display_name%"
 MENTION = "%mention%"

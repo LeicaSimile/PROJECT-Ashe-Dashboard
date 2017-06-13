@@ -10,10 +10,10 @@ import settings
 
 logging.config.fileConfig("logging.ini")
 logger = logging.getLogger("main")
-bot = commands.Bot(command_prefix=settings.BOT_PREFIX, description="For humanity!", pm_help=None)
 
 def main():
-    ashe = projectashe.ProjectAshe(bot)
+    bot = commands.Bot(settings.BOT_PREFIX, description="For humanity!", pm_help=True)
+    ashe = projectashe.ProjectAshe(bot, settings.FILE_DATABASE)
     ashe.run(settings.TOKEN)
 
 

@@ -8,7 +8,6 @@ from enum import Enum
 
 import settings
 
-FILE_DATABASE = "database/project-ashe.db"
 logging.config.fileConfig("logging.ini")
 logger = logging.getLogger("phrases")
 
@@ -444,7 +443,7 @@ class Database(object):
 
 
 def test():
-    d = Database(FILE_DATABASE)
+    d = Database(settings.FILE_DATABASE)
     phrase = d.random_line("phrase", "phrases", {"category_id": f"{Category.WELCOME_SERVER.value},{Category.SHUTDOWN.value}"})
     print(phrase)
     print(parse_all(phrase))
