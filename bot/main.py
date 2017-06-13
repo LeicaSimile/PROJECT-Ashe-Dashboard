@@ -4,7 +4,6 @@ from discord.ext import commands
 import logging
 import logging.config
 
-
 import projectashe
 import settings
 
@@ -13,7 +12,7 @@ logger = logging.getLogger("main")
 
 def main():
     bot = commands.Bot(settings.BOT_PREFIX, description="For humanity!", pm_help=True)
-    ashe = projectashe.ProjectAshe(bot, settings.FILE_DATABASE)
+    ashe = projectashe.Bot(bot, settings.FILE_DATABASE)
     ashe.run(settings.TOKEN)
 
 
