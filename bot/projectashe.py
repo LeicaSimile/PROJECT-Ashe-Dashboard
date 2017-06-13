@@ -18,18 +18,18 @@ class ProjectAshe(object):
 
     def event_ready(self):
         async def on_ready():
-            logger.info("{} is now online.".format(self.bot.user.name))
-            logger.info("ID: {}".format(self.bot.user.id))
-            logger.info("Command prefix: {}".format(settings.BOT_PREFIX))
+            logger.info(f"{self.bot.user.name} is now online.")
+            logger.info(f"ID: {self.bot.user.id}")
+            logger.info(f"Command prefix: {settings.BOT_PREFIX}")
 
-            await self.bot.change_presence(game=discord.Game(name="DDR | {}help".format(settings.BOT_PREFIX)))
+            await self.bot.change_presence(game=discord.Game(name=f"DDR | {settings.BOT_PREFIX}help"))
 
         return on_ready
 
     def event_member_join(self):
         async def on_member_join(member):
             server = member.server
-            await self.bot.send_message(server, 'Salvation, bit by bit. Good to have you on our side, {0.mention}'.format(member))
+            await self.bot.send_message(server, f"Salvation, bit by bit. Good to have you on our side, {member.mention}")
 
         return on_member_join
     

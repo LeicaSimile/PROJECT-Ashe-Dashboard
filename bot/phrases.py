@@ -35,19 +35,19 @@ def parse_cases(text):
     Args:
         text(unicode): String to parse.
     """
-    for result in re.finditer(r"{}(.*?){}".format(settings.OPEN_UPPER, settings.CLOSE_UPPER), text):
+    for result in re.finditer(fr"{settings.OPEN_UPPER}(.*?){settings.CLOSE_UPPER}", text):
         ## Uppercase -> "ALL MY LIFE HAS BEEN A SERIES OF DOORS IN MY FACE."
         text = text.replace(result.group(), result.group(1).upper())
 
-    for result in re.finditer(r"{}(.*?){}".format(settings.OPEN_LOWER, settings.CLOSE_LOWER), text):
+    for result in re.finditer(fr"{settings.OPEN_LOWER}(.*?){settings.CLOSE_LOWER}", text):
         ## Lowercase -> "all my life has been a series of doors in my face."
         text = text.replace(result.group(), result.group(1).lower())
 
-    for result in re.finditer(r"{}(.*?){}".format(settings.OPEN_STARTCASE, settings.CLOSE_STARTCASE), text):
+    for result in re.finditer(fr"{settings.OPEN_STARTCASE}(.*?){settings.CLOSE_STARTCASE}", text):
         ## Startcase -> "All My Life Has Been A Series Of Doors In My Face."
         text = text.replace(result.group(), titlecase(result.group(1)))
 
-    for result in re.finditer(r"{}(.*?){}".format(settings.OPEN_SENTENCE, settings.CLOSE_SENTENCE), text):
+    for result in re.finditer(fr"{settings.OPEN_SENTENCE}(.*?){settings.CLOSE_SENTENCE}", text):
         ## Sentence case -> "All my life has been a series of doors in my face."
         newCase = result.group(1)
         
@@ -229,7 +229,7 @@ def parse_all(text):
     text = parse_cases(text)
 
     ## Parse escape characters.
-    text = text.replace("{e}{e}".format(e=settings.ESCAPE_CHAR), settings.SENTINEL)
+    text = text.replace("{0}{0}".format(settings.ESCAPE_CHAR), settings.SENTINEL)
     text = text.replace(settings.ESCAPE_CHAR, "")
     text = text.replace(settings.SENTINEL, settings.ESCAPE_CHAR)
 
@@ -241,11 +241,11 @@ def regexp(expression, line):
     if line:
         return reg.search(line) is not None
 
-def titlecase(s):
+def titlecase(text):
     return re.sub(r"[A-Za-z]+('[A-Za-z]+)?",
                   lambda mo: mo.group(0)[0].upper() +
                              mo.group(0)[1:].lower(),
-                  s)
+                  text)
 
 
 ## === Classes === ##
@@ -284,9 +284,9 @@ class Database(object):
         connection.row_factory = lambda cursor, row: row[0]
         c = connection.cursor()
         if maximum:
-            c.execute("SELECT {} FROM {} LIMIT ?".format(header, table), [maximum])
+            c.execute(f"SELECT {header} FROM {table} LIMIT ?", [maximum])
         else:
-            c.execute("SELECT {} FROM {}".format(header, table))
+            c.execute(f"SELECT {header} FROM {table}")
         fields = c.fetchall()
         c.close()
         
@@ -317,14 +317,14 @@ class Database(object):
         connection = sqlite3.connect(self.db)
         c = connection.cursor()
 
-        statement = "SELECT {} FROM {} WHERE id=?".format(header, table)
+        statement = f"SELECT {header} FROM {table} WHERE id=?"
         logger.debug(statement)
         c.execute(statement, [field_id])
 
         try:
             field = c.fetchone()[0]
         except TypeError:
-            logger.exception("ID \"{}\" was not in table \"{}\"".format(field_id, table))
+            logger.exception(f"ID '{field_id}' was not in table '{table}'")
         
         c.close()
         
@@ -380,7 +380,7 @@ class Database(object):
                     if 1 < sub_count:
                         clause_list.append(" OR ")
                     
-                    clause_list.append("{}=?".format(clean(con)))
+                    clause_list.append(f"{clean(con)}=?")
                     substitutes.append(sub)
                     sub_count += 2
                     
@@ -390,13 +390,13 @@ class Database(object):
 
             clause = "".join(clause_list)
 
-            statement = "SELECT id FROM {} {}".format(table, clause)
-            logger.debug("(get_ids) Substitutes: {}".format(substitutes))
-            logger.debug("(get_ids) SQLite statement: {}".format(statement))
+            statement = f"SELECT id FROM {table} {clause}"
+            logger.debug(f"(get_ids) Substitutes: {substitutes}")
+            logger.debug(f"(get_ids) SQLite statement: {statement}")
 
             c.execute(statement, substitutes)
         else:
-            c.execute("SELECT id FROM {}".format(table))
+            c.execute(f"SELECT id FROM {table}")
 
         ids = c.fetchall()
 
@@ -437,7 +437,7 @@ class Database(object):
                 line = random.choice(ids)
                 line = self.get_field(line, header, table)
         else:
-            c.execute("SELECT {} FROM {} ORDER BY Random() LIMIT 1".format(header, table))  # TODO: Take categories into account.
+            c.execute(f"SELECT {header} FROM {table} ORDER BY Random() LIMIT 1")  # TODO: Take categories into account.
             line = c.fetchone()[0]
 
         return line
@@ -445,7 +445,7 @@ class Database(object):
 
 def test():
     d = Database(FILE_DATABASE)
-    phrase = d.random_line("phrase", "phrases", {"category_id": "{},{}".format(Category.WELCOME_SERVER.value, Category.SHUTDOWN.value)})
+    phrase = d.random_line("phrase", "phrases", {"category_id": f"{Category.WELCOME_SERVER.value},{Category.SHUTDOWN.value}"})
     print(phrase)
     print(parse_all(phrase))
 

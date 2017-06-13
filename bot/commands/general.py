@@ -34,5 +34,5 @@ class Debugging():
         user_name = context.message.author.mention
         
         await self.bot.send_message(context.message.channel,
-                                    "{}, your ID is {}".format(user_name, user_id))
+                                    f"{user_name}, your ID is {user_id}")
 
