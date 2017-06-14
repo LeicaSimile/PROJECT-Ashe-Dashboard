@@ -35,8 +35,20 @@ class Bot(object):
             logger.info(f"Command prefix: {settings.BOT_PREFIX}")
 
             await self.client.change_presence(game=discord.Game(name=f"DDR | {settings.BOT_PREFIX}help"))
+            await self.client.say(self.db.random_line("phrase", "phrases", {"category_id": phrases.Category.ONLINE.value}))
 
         return on_ready
+
+    def parse(self, text):
+        """ Interprets a string and formats accordingly, substituting placeholders with values, etc.
+
+        Args:
+            text(unicode): String to parse.
+
+        Returns:
+            text(unicode): Parsed string.
+        """
+        return text
     
     def set_commands(self):
         self.client.add_cog(general.General(self))
