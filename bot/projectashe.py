@@ -21,6 +21,13 @@ class Bot(object):
         self.set_commands()
         self.client.run(token)
 
+    def event_member_join(self):
+        async def on_member_join(member):
+            server = member.server
+            await self.client.send_message(server, f"Salvation, bit by bit. Good to have you on our side, {member.mention}")
+
+        return on_member_join
+
     def event_ready(self):
         async def on_ready():
             logger.info(f"{self.client.user.name} is now online.")
@@ -30,13 +37,6 @@ class Bot(object):
             await self.client.change_presence(game=discord.Game(name=f"DDR | {settings.BOT_PREFIX}help"))
 
         return on_ready
-
-    def event_member_join(self):
-        async def on_member_join(member):
-            server = member.server
-            await self.client.send_message(server, f"Salvation, bit by bit. Good to have you on our side, {member.mention}")
-
-        return on_member_join
     
     def set_commands(self):
         self.client.add_cog(general.General(self))
