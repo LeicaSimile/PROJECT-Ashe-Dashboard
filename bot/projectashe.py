@@ -24,7 +24,7 @@ class Bot(object):
     def event_member_join(self):
         async def on_member_join(member):
             server = member.server
-            message = self.db.random_line("phrase", "phrases", {"category_id": phrases.Category.WELCOME_SERVER.value})
+            message = self.get_phrase(phrases.Category.WELCOME_SERVER.value)
 
             substitutions = {
                     settings.DISPLAY_NAME: member.display_name,
@@ -46,17 +46,26 @@ class Bot(object):
             await self.client.change_presence(game=discord.Game(name=f"DDR | {settings.BOT_PREFIX}help"))
 
 ##            for server in self.client.servers:
-##                message = self.db.random_line("phrase", "phrases", {"category_id": phrases.Category.ONLINE.value})
+##                message = self.get_phrase(phrases.Category.ONLINE.value)
 ##                message = self.parse(message, {settings.SERVER_NAME: server.name})
 ##                await self.client.send_message(server, message)
 
         return on_ready
+
+    def get_phrase(self, category):
+        """ Shortcut for getting a random phrase from the database.
+
+        Args:
+            category(unicode): The phrase category, as seen in the enum 'Category' in phrases.py.
+        """
+        return self.db.random_line("phrase", "phrases", {"category_id": category})
 
     def parse(self, text, context=None, substitutions=None):
         """ Interprets a string and formats accordingly, substituting placeholders with values, etc.
 
         Args:
             text(unicode): String to parse.
+            context(discord.Context, optional): Current context of the message.
             substitutions(dict, optional): Substitutions to perform. Replaces key with corresponding value.
 
         Returns:
