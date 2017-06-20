@@ -44,11 +44,14 @@ class Bot(object):
             logger.info(f"Command prefix: {settings.BOT_PREFIX}")
 
             await self.client.change_presence(game=discord.Game(name=f"DDR | {settings.BOT_PREFIX}help"))
-            await self.client.say(self.db.random_line("phrase", "phrases", {"category_id": phrases.Category.ONLINE.value}))
+
+##            for server in self.client.servers:
+##                message = self.db.random_line("phrase", "phrases", {"category_id": phrases.Category.ONLINE.value})
+##                message = self.parse(message, {settings.SERVER_NAME: server.name})
+##                await self.client.send_message(server, message)
 
         return on_ready
 
-    def parse(self, text):
     def parse(self, text, context=None, substitutions=None):
         """ Interprets a string and formats accordingly, substituting placeholders with values, etc.
 
