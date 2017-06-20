@@ -24,7 +24,16 @@ class Bot(object):
     def event_member_join(self):
         async def on_member_join(member):
             server = member.server
-            await self.client.send_message(server, f"Salvation, bit by bit. Good to have you on our side, {member.mention}")
+            message = self.db.random_line("phrase", "phrases", {"category_id": phrases.Category.WELCOME_SERVER.value})
+
+            substitutions = {
+                    settings.DISPLAY_NAME: member.display_name,
+                    settings.MENTION: member.mention,
+                    settings.SERVER_NAME: member.server.name,
+                    settings.USER_NAME: member.name
+                }
+            message = self.parse(message, substitutions)
+            await self.client.send_message(server, message)
 
         return on_member_join
 
@@ -40,14 +49,30 @@ class Bot(object):
         return on_ready
 
     def parse(self, text):
+    def parse(self, text, context=None, substitutions=None):
         """ Interprets a string and formats accordingly, substituting placeholders with values, etc.
 
         Args:
             text(unicode): String to parse.
+            substitutions(dict, optional): Substitutions to perform. Replaces key with corresponding value.
 
         Returns:
             text(unicode): Parsed string.
         """
+        if not substitutions: substitutions = {}
+        text = phrases.parse_all(text)
+        
+        subs = {
+            settings.DISPLAY_NAME: substitutions.get(settings.DISPLAY_NAME, ""),
+            settings.MENTION: substitutions.get(settings.MENTION, ""),
+            settings.SERVER_NAME: substitutions.get(settings.SERVER_NAME, ""),
+            settings.USER_NAME: substitutions.get(settings.USER_NAME, "")
+            }
+
+        for s in substitutions:
+            text = text.replace(s, substitutions[s])
+            logger.debug(f"parse(): {text} (replaced '{s}' with '{subs[s]}')")
+        
         return text
     
     def set_commands(self):
