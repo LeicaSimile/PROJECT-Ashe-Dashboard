@@ -26,6 +26,9 @@ TOKEN = config.get("info", "token")
 FILE_DATABASE = "database/project-ashe.db"
 
 """Placeholders for variables in phrases"""
+BOT_DISPLAY_NAME = "%bot_display%"
+BOT_NAME = "%bot%"
+CHANNEL_NAME = "%channel%"
 DISPLAY_NAME = "%display_name%"
 MENTION = "%mention%"
 SERVER_NAME = "%server%"
