@@ -1,4 +1,5 @@
 import discord
+from discord.ext.commands.context import Context
 import logging
 import logging.config
 
@@ -65,21 +66,40 @@ class Bot(object):
 
         Args:
             text(unicode): String to parse.
-            context(discord.Context, optional): Current context of the message.
-            substitutions(dict, optional): Substitutions to perform. Replaces key with corresponding value.
+            context(Context, optional): Current context of the message.
+            substitutions(dict, optional): Other substitutions to perform. Replaces key with corresponding value.
 
         Returns:
             text(unicode): Parsed string.
         """
         if not substitutions: substitutions = {}
         text = phrases.parse_all(text)
+
+        ## Add context variables to substitutions.
+        substitutions[settings.BOT_DISPLAY_NAME] = self.client.user.name
+        substitutions[settings.BOT_NAME] = self.client.user.display_name
         
-        subs = {
-            settings.DISPLAY_NAME: substitutions.get(settings.DISPLAY_NAME, ""),
-            settings.MENTION: substitutions.get(settings.MENTION, ""),
-            settings.SERVER_NAME: substitutions.get(settings.SERVER_NAME, ""),
-            settings.USER_NAME: substitutions.get(settings.USER_NAME, "")
-            }
+        try:
+            ## Channel variables
+            substitutions[settings.CHANNEL_NAME] = context.message.channel.name
+        except AttributeError:
+            substitutions[settings.CHANNEL_NAME] = ""
+            
+        try:
+            ## User (author) variables
+            substitutions[settings.DISPLAY_NAME] = context.message.author.display_name
+            substitutions[settings.MENTION] = context.message.author.mention
+            substitutions[settings.USER_NAME] = context.message.author.name
+        except AttributeError:
+            substitutions[settings.DISPLAY_NAME] = ""
+            substitutions[settings.MENTION] = ""
+            substitutions[settings.USER_NAME] = ""
+            
+        try:
+            ## Server variables
+            substitutions[settings.SERVER_NAME] = context.message.server.name
+        except AttributeError:
+            substitutions[settings.SERVER_NAME] = ""
 
         for s in substitutions:
             text = text.replace(s, substitutions[s])
