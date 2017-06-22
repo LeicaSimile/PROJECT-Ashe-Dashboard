@@ -13,6 +13,11 @@ logger = logging.getLogger("bot")
 
 
 class Bot(object):
+    """
+    Attributes:
+        client(discord.Bot): The bot instance.
+        db_file(str): File path of the bot's database. Used to create 'db', a Database instance.
+    """
     def __init__(self, client, db_file):
         self.client = client
         self.db = phrases.Database(db_file)
