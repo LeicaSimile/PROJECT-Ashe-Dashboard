@@ -1,10 +1,10 @@
 import discord
-from discord.ext.commands.context import Context
 import logging
 import logging.config
 
 from commands import general
 from commands import music
+from context import GeneralContext
 import settings
 import phrases
 
@@ -31,14 +31,9 @@ class Bot(object):
         async def on_member_join(member):
             server = member.server
             message = self.get_phrase(phrases.Category.WELCOME_SERVER.value)
-
-            substitutions = {
-                    settings.DISPLAY_NAME: member.display_name,
-                    settings.MENTION: member.mention,
-                    settings.SERVER_NAME: member.server.name,
-                    settings.USER_NAME: member.name
-                }
-            message = self.parse(message, substitutions)
+            ctx = GeneralContext(server=server, user=member)
+            
+            message = self.parse(message, context=ctx)
             await self.client.send_message(server, message)
 
         return on_member_join
@@ -71,7 +66,7 @@ class Bot(object):
 
         Args:
             text(unicode): String to parse.
-            context(Context, optional): Current context of the message.
+            context(GeneralContext, optional): Current context of the message.
             substitutions(dict, optional): Other substitutions to perform. Replaces key with corresponding value.
 
         Returns:
@@ -83,18 +78,18 @@ class Bot(object):
         ## Add context variables to substitutions.
         substitutions[settings.BOT_DISPLAY_NAME] = self.client.user.name
         substitutions[settings.BOT_NAME] = self.client.user.display_name
-        
+
         try:
             ## Channel variables
-            substitutions[settings.CHANNEL_NAME] = context.message.channel.name
+            substitutions[settings.CHANNEL_NAME] = context.channel.name
         except AttributeError:
             substitutions[settings.CHANNEL_NAME] = ""
             
         try:
             ## User (author) variables
-            substitutions[settings.DISPLAY_NAME] = context.message.author.display_name
-            substitutions[settings.MENTION] = context.message.author.mention
-            substitutions[settings.USER_NAME] = context.message.author.name
+            substitutions[settings.DISPLAY_NAME] = context.user.display_name
+            substitutions[settings.MENTION] = context.user.mention
+            substitutions[settings.USER_NAME] = context.user.name
         except AttributeError:
             substitutions[settings.DISPLAY_NAME] = ""
             substitutions[settings.MENTION] = ""
@@ -102,13 +97,13 @@ class Bot(object):
             
         try:
             ## Server variables
-            substitutions[settings.SERVER_NAME] = context.message.server.name
+            substitutions[settings.SERVER_NAME] = context.server.name
         except AttributeError:
             substitutions[settings.SERVER_NAME] = ""
 
         for s in substitutions:
             text = text.replace(s, substitutions[s])
-            logger.debug(f"parse(): {text} (replaced '{s}' with '{subs[s]}')")
+            logger.debug(f"parse(): {text} (replaced '{s}' with '{substitutions[s]}')")
         
         return text
     
