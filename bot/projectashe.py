@@ -5,8 +5,9 @@ import logging.config
 from commands import general
 from commands import music
 from context import GeneralContext
-import settings
+import database
 import phrases
+import settings
 
 logging.config.fileConfig("logging.ini")
 logger = logging.getLogger("bot")
@@ -21,7 +22,7 @@ class Bot(object):
     """
     def __init__(self, client, db_file):
         self.client = clienta
-        self.db = phrases.Database(db_file)
+        self.db = database.Database(db_file)
 
     def run(self, token):
         self.set_events()
