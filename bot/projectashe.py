@@ -21,7 +21,7 @@ class Bot(object):
             a Database instance.
     """
     def __init__(self, client, db_file):
-        self.client = clienta
+        self.client = client
         self.db = database.Database(db_file)
 
     def run(self, token):
