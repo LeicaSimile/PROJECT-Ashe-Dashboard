@@ -16,10 +16,11 @@ class Bot(object):
     """
     Attributes:
         client(discord.Bot): The bot instance.
-        db_file(str): File path of the bot's database. Used to create 'db', a Database instance.
+        db_file(str): File path of the bot's database. Used to create 'db',
+            a Database instance.
     """
     def __init__(self, client, db_file):
-        self.client = client
+        self.client = clienta
         self.db = phrases.Database(db_file)
 
     def run(self, token):
@@ -44,7 +45,8 @@ class Bot(object):
             logger.info(f"ID: {self.client.user.id}")
             logger.info(f"Command prefix: {settings.BOT_PREFIX}")
 
-            await self.client.change_presence(game=discord.Game(name=f"DDR | {settings.BOT_PREFIX}help"))
+            status = f"DDR |{settings.BOT_PREFIX}help"
+            await self.client.change_presence(game=discord.Game(name=status))
 
 ##            for server in self.client.servers:
 ##                message = self.get_phrase(phrases.Category.ONLINE.value)
@@ -57,17 +59,18 @@ class Bot(object):
         """ Shortcut for getting a random phrase from the database.
 
         Args:
-            category(unicode): The phrase category, as seen in the enum 'Category' in phrases.py.
+            category(unicode): The phrase category - see enum 'Category' in phrases.py.
         """
         return self.db.random_line("phrase", "phrases", {"category_id": category})
 
     def parse(self, text, context=None, substitutions=None):
-        """ Interprets a string and formats accordingly, substituting placeholders with values, etc.
+        """ Interprets a string and formats accordingly, substitutes values, etc.
 
         Args:
             text(unicode): String to parse.
             context(GeneralContext, optional): Current context of the message.
-            substitutions(dict, optional): Other substitutions to perform. Replaces key with corresponding value.
+            substitutions(dict, optional): Other substitutions to perform.
+                Replaces key with corresponding value.
 
         Returns:
             text(unicode): Parsed string.

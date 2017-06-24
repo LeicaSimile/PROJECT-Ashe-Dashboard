@@ -34,25 +34,31 @@ def parse_cases(text):
     Args:
         text(unicode): String to parse.
     """
-    for result in re.finditer(fr"{settings.OPEN_UPPER}(.*?){settings.CLOSE_UPPER}", text):
+    UPPER_PATTERN = fr"{settings.OPEN_UPPER}(.*?){settings.CLOSE_UPPER}"
+    LOWER_PATTERN = fr"{settings.OPEN_LOWER}(.*?){settings.CLOSE_LOWER}"
+    STARTCASE_PATTERN = fr"{settings.OPEN_STARTCASE}(.*?){settings.CLOSE_STARTCASE}"
+    SENCASE_PATTERN = fr"{settings.OPEN_SENTENCE}(.*?){settings.CLOSE_SENTENCE}"
+    
+    for result in re.finditer(UPPER_PATTERN, text):
         ## Uppercase -> "ALL MY LIFE HAS BEEN A SERIES OF DOORS IN MY FACE."
         text = text.replace(result.group(), result.group(1).upper())
 
-    for result in re.finditer(fr"{settings.OPEN_LOWER}(.*?){settings.CLOSE_LOWER}", text):
+    for result in re.finditer(LOWER_PATTERN, text):
         ## Lowercase -> "all my life has been a series of doors in my face."
         text = text.replace(result.group(), result.group(1).lower())
 
-    for result in re.finditer(fr"{settings.OPEN_STARTCASE}(.*?){settings.CLOSE_STARTCASE}", text):
+    for result in re.finditer(STARTCASE_PATTERN, text):
         ## Startcase -> "All My Life Has Been A Series Of Doors In My Face."
         text = text.replace(result.group(), titlecase(result.group(1)))
 
-    for result in re.finditer(fr"{settings.OPEN_SENTENCE}(.*?){settings.CLOSE_SENTENCE}", text):
+    for result in re.finditer(SENCASE_PATTERN, text):
         ## Sentence case -> "All my life has been a series of doors in my face."
         newCase = result.group(1)
         
         for index, character in enumerate(newCase):
             if character.isalpha():
-                text = text.replace(result.group(), newCase[:index] + newCase[index:].capitalize())
+                text = text.replace(result.group(),
+                                    newCase[:index] + newCase[index:].capitalize())
                 break
         
         
@@ -62,10 +68,12 @@ def parse_choices(text):
     """ Chooses a random option in a given set.
 
     Args:
-        text(unicode): String to parse. Options are enclosed in angle brackets, separated by a pipeline.
+        text(unicode): String to parse. Options are enclosed in angle brackets,
+            separated by a pipeline.
 
     Yields:
-        newString(unicode): An option from the leftmost set of options is chosen for the string and updates accordingly.
+        newString(unicode): An option from the leftmost set of options is chosen
+            for the string and updates accordingly.
 
     Raises:
         StopIteration: text's options are all chosen.
@@ -74,7 +82,8 @@ def parse_choices(text):
         >>> next(parse_choices("<Chocolates|Sandwiches> are the best!"))
         "Chocolates are the best!"
 
-        >>> result = parse_choices("I would like some <cupcakes|ice cream>, <please|thanks>.")
+        >>> result = parse_choices("I would like some <cupcakes|ice cream>,
+            <please|thanks>.")
         >>> for _ in result: print(next(result))
         I would like some <cupcakes|ice cream>, thanks.
         I would like some cupcakes, thanks.
@@ -143,7 +152,8 @@ def parse_optional(text):
         text(unicode): String to parse. Substring to be reviewed is enclosed in braces.
 
     Yields:
-        text(unicode): The string with or without the leftmost substring, stripped of the braces.
+        text(unicode): The string with or without the leftmost substring,
+            stripped of the braces.
 
     Raises:
         StopIteration: text's braces are fully parsed.
@@ -193,7 +203,8 @@ def parse_optional(text):
             if random.getrandbits(1):
                 text = "".join([text[:open_index], text[close_index + 1:]])
             else:
-                text = "".join([text[:open_index], text[open_index + 1:close_index], text[close_index + 1:]])
+                text = "".join([text[:open_index], text[open_index + 1:close_index],
+                                ext[close_index + 1:]])
         else:
             done = True
             
@@ -292,7 +303,7 @@ class Database(object):
         return fields
 
     def get_field(self, field_id, header, table):
-        """ Gets the field under the specified header, identified by its primary key value.
+        """ Gets the field under the specified header by its primary key value.
 
         Args:
             field_id(int, str): Unique ID of line the field is in.
@@ -330,12 +341,15 @@ class Database(object):
         return field
 
     def get_ids(self, table, conditions=None, splitter=","):
-        """ Gets the IDs that fit within the specified categories. Gets all IDs if category is None.
+        """ Gets the IDs that fit within the specified conditions.
+
+        Gets all IDs if conditions is None.
 
         Args:
             table(unicode): Name of table to look into.
-            conditions(list, optional): Categories you want to filter the line by, formatted like so:
-                {"header of categories 1": "category1,category2", "header of category 2": "category3"}
+            conditions(list, optional): Categories you want to filter the line by:
+                {"header of categories 1": "category1,category2",
+                 "header of category 2": "category3"}
                 Multiple categories under a single header are separated with a comma.
 
         Returns:
@@ -350,14 +364,15 @@ class Database(object):
             [1, 2, 3, 5, 9, 15]  # Any row that has the type "greeting".
 
             >>> get_ids({"type": "nickname,quip", "by": "Varric"})
-            [23, 24, 25, 34, 37, 41, 42, 43]  # Any row by "Varric" that has the type "nickname" or "quip".
+            # Any row by "Varric" that has the type "nickname" or "quip".
+            [23, 24, 25, 34, 37, 41, 42, 43]
         """
         ids = []
         table = clean(table)
         clause = ""
         
         connection = sqlite3.connect(self.db)
-        connection.row_factory = lambda cursor, row: row[0]  # Outputs first element of tuple for fetchall()
+        connection.row_factory = lambda cursor, row: row[0]  # Gets first element for fetchall()
 
         c = connection.cursor()
 
@@ -405,12 +420,14 @@ class Database(object):
         """ Chooses a random line from the table under the header.
 
         Args:
-            header(unicode): The header of the column where you want a random line from.
+            header(unicode): The header of the random line's column.
             table(unicode): Name of the table to look into.
-            conditions(dict, optional): Categories you want to filter the line by, formatted like so:
-                {"header of categories 1": "category1,category2", "header of category 2": "category3"}
+            conditions(dict, optional): Categories to filter the line by:
+                {"header of categories 1": "category1,category2",
+                "header of category 2": "category3"}
                 Multiple categories under a single header are separated with a comma.
-            splitter(unicode, optional): What separates multiple categories (default is a comma).
+            splitter(unicode, optional): What separates multiple categories
+                (default is a comma).
 
         Returns:
             line(unicode): A random line from the database.
@@ -443,10 +460,7 @@ class Database(object):
 
 
 def test():
-    d = Database(settings.FILE_DATABASE)
-    phrase = d.random_line("phrase", "phrases", {"category_id": f"{Category.WELCOME_SERVER.value},{Category.SHUTDOWN.value}"})
-    print(phrase)
-    print(parse_all(phrase))
+    pass
 
 if "__main__" == __name__:
     test()

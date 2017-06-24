@@ -22,7 +22,8 @@ class General(object):
             await self.bot.client.send_message(context.message.channel, shutdown_msg)
             await self.bot.client.logout()
         else:
-            await self.bot.client.send_message(context.message.channel, "Don't tell me what to do.")
+            message = "Don't tell me what to do."
+            await self.bot.client.send_message(context.message.channel, message)
 
 
 class Debugging(object):
