@@ -1,6 +1,7 @@
 import discord
 from discord.ext import commands
 
+import database
 import settings
 import phrases
 
@@ -18,9 +19,11 @@ class General(object):
     @commands.command(pass_context=True)
     async def shutdown(self, context):
         if context.message.author.id == settings.OWNER_ID:
-            shutdown_msg = self.bot.get_phrase(phrases.Category.SHUTDOWN.value)
-            await self.bot.client.send_message(context.message.channel, shutdown_msg)
-            await self.bot.client.logout()
+            try:
+                shutdown_msg = self.bot.get_phrase(database.Category.SHUTDOWN.value)
+                await self.bot.client.send_message(context.message.channel, shutdown_msg)
+            finally:
+                await self.bot.client.logout()
         else:
             message = "Don't tell me what to do."
             await self.bot.client.send_message(context.message.channel, message)

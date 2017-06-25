@@ -32,7 +32,7 @@ class Bot(object):
     def event_member_join(self):
         async def on_member_join(member):
             server = member.server
-            message = self.get_phrase(phrases.Category.WELCOME_SERVER.value)
+            message = self.get_phrase(database.Category.WELCOME_SERVER.value)
             ctx = GeneralContext(server=server, user=member)
             
             message = self.parse(message, context=ctx)
@@ -48,11 +48,6 @@ class Bot(object):
 
             status = f"DDR |{settings.BOT_PREFIX}help"
             await self.client.change_presence(game=discord.Game(name=status))
-
-##            for server in self.client.servers:
-##                message = self.get_phrase(phrases.Category.ONLINE.value)
-##                message = self.parse(message, {settings.SERVER_NAME: server.name})
-##                await self.client.send_message(server, message)
 
         return on_ready
 
