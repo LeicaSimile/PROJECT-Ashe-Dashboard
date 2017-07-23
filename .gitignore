@@ -1,4 +1,7 @@
 config.ini
+settings.ini
 database/
 log/
+
+env/
 *.pyc
