@@ -1,11 +1,12 @@
 # -*- coding: utf-8 -*-
 import logging
+import re
 
+import discord
 import discordion
 
-from . import commands
-from . import settings
-from .settings import config
+import commands
+from discordion.settings import config
 
 
 class Bot(discordion.Bot):
@@ -19,22 +20,8 @@ class Bot(discordion.Bot):
         
     """
     
-    def __init__(self, file_config, logger=None, formatter=None, pm_help=False, **options):
-        super().__init__(file_config, logger, formatter, pm_help, **options)
-        self.db_manual = sqlitehouse.Database(config.get("files", "database_manual"))
-        self.db_auto = sqlitehouse.Database(config.get("files", "database_auto"))
-
-    
-    def event_member_join(self):
-        async def on_member_join(member):
-            server = member.server
-            response = self.get_phrase(phrases.Category.GREET.value)
-            ctx = GeneralContext(server=server, user=member)
-            
-            response = self.parse(response, context=ctx)
-            await self.client.send_message(server, response)
-
-        return on_member_join
+    def __init__(self, file_config, logger=None, **options):
+        super().__init__(file_config, logger, **options)
 
     def event_ready(self):
         async def on_ready():
@@ -44,20 +31,18 @@ class Bot(discordion.Bot):
             self.logger.info(f"Command prefix: {prefix}")
 
             status = config.get("bot", "status")
-            await self.client.change_presence(game=discord.Game(name=status))
+            await self.client.change_presence(activity=discord.Game(name=status))
 
         return on_ready
     
     def set_commands(self, *cmds):
-        self.client.add_cog(commands.General(self))
-        self.client.add_cog(commands.Owner(self))
+        self.client.add_cog(commands.Admin(self))
         
         for c in cmds:
             self.client.add_cog(c)
         
     def set_events(self, *events):
         self.client.event(self.event_ready())
-        self.client.event(self.event_member_join())
 
         for e in events:
             self.client.event(e)

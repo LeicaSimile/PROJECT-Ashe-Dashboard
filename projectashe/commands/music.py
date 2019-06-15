@@ -1,8 +1,6 @@
 import discord
 from discord.ext import commands
 
-import settings
-
 
 class Music(object):
     """Music commands"""

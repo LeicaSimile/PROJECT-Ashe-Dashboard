@@ -1,15 +1,14 @@
 # -*- coding: utf-8 -*-
 import logging
 import logging.config
-
-import discordion
+from bot import Bot
 
 logging.config.fileConfig("logging.ini")
 logger = logging.getLogger("main")
 
 def main():
     FILE_CONFIG = "settings.ini"
-    ashe = discordion.Bot(FILE_CONFIG)
+    ashe = Bot(FILE_CONFIG)
     ashe.run()
 
 

@@ -1,3 +1,5 @@
+import datetime
+import re
 import discord
 from discord.ext import commands
 
@@ -5,8 +7,8 @@ import discordion
 from discordion.settings import config
 
 
-class General(object):
-    """General commands."""
+class Admin(commands.Cog):
+    """Commands usable only by the admin."""
 
     def __init__(self, bot):
         """
@@ -16,56 +18,85 @@ class General(object):
         """
         self.bot = bot
 
-    @commands.command(description="Tells you your user ID.", pass_context=True)
-    async def getid(self, context):
-        user_id = context.message.author.id
-        user_name = context.message.author.mention
-        
-        await self.bot.client.send_message(context.message.channel,
-                                           f"{user_name}, your ID is {user_id}")
-
-
-class Owner(object):
-    """Commands usable only by the owner."""
-
-    def __init__(self, bot):
-        """
-        Args:
-            bot(discordion.Bot): Bot instance.
-            
-        """
-        self.bot = bot
-
-    @commands.command(pass_context=True)
-    async def shutdown(self, context):
-        context = discordion.GeneralContext(context=context)
-        if context.user.id == config.get("bot", "owner_id"):
+    @commands.command()
+    async def addrole(self, context):
+        async def give_role(context):
+            msg_parts = context.message.content.split(" ", 2)
             try:
-                response = self.bot.get_phrase("")
+                user = discord.utils.get(context.guild.members, id=int(msg_parts[1]))
+                role = discord.utils.get(context.guild.roles, name=msg_parts[2])
+                await user.add_roles(role, reason="My owner told me to.")
+            except IndexError:
+                await self.bot.say(context.channel, "Say: ;addrole [user ID] [role name]")
+            except AttributeError:
+                await self.bot.say(context.channel, f"Couldn't find user ID {msg_parts[1]}.")
+            else:
+                await context.message.add_reaction(u"\U0001F44D")
                 
+        await self.validate_owner(context, give_role)
+
+    @commands.command()
+    async def removerole(self, context):
+        async def remove_role(context):
+            msg_parts = context.message.content.split(" ", 2)
+            try:
+                user = discord.utils.get(context.guild.members, id=int(msg_parts[1]))
+                role = discord.utils.get(context.guild.roles, name=msg_parts[2])
+                await user.remove_roles(role, reason="My owner told me to.")
+            except IndexError:
+                await self.bot.say(context.channel, "Say: ;removerole [user ID] [role name]")
+            except AttributeError:
+                await self.bot.say(context.channel, f"Couldn't find user ID {msg_parts[1]}.")
+            else:
+                await context.message.add_reaction(u"\U0001F44D")
+                
+        await self.validate_owner(context, remove_role)
+
+    @commands.command()
+    async def shutdown(self, context):
+        async def log_out(context):
+            try:
+                response = self.bot.get_phrase(database.Category.SHUTDOWN.value)
                 await self.bot.say(context.channel, response, context)
             finally:
                 await self.bot.client.logout()
-        else:
+
+        async def sass(context):
             response = "Don't tell me what to do."
             await self.bot.say(context.channel, response)
 
-    @commands.command(pass_context=True)
-    async def changegame(self, context):
-        async def change_status(context):
-            status = context.argument
-            g = discord.Game(name=status)
-            await self.bot.client.change_presence(game=g)
+        await self.validate_owner(context, log_out, sass)
 
-        await self.validate_owner(context, change_status)
-
-    @commands.command(pass_context=True)
+    @commands.command()
     async def reconfig(self, context):
         async def read_config(context):
             discordion.settings.read_settings(self.bot.file_config)
             await self.bot.say(context.channel, "Settings updated.")
 
         await self.validate_owner(context, read_config)
+
+    @commands.Cog.listener()
+    async def on_message(self, message):
+        user = message.author
+        roles = {
+            5: 533369804334039061,
+            10: 533369803965071381,
+            20: 533369912207474706,
+            30: 533369949591175169,
+            50: 573702137918390272
+        }
+        print(f"[{datetime.datetime.now():%H:%M}]({message.guild.name} - {message.channel.name}) {user.name}: {message.content}")
+        
+        if user.id == 159985870458322944:  # MEE6 Bot
+            result = re.compile(r"GG <@(?:.+)>, you just advanced to level ([0-9]+)!").match(message.content)
+            if result:
+                mentioned = message.mentions[0]
+                level = int(result.group(1))
+                print("{mentioned.name} reached level {level}")
+                for r in roles:
+                    if level >= r:    
+                        role = discord.utils.get(message.guild.roles, id=roles[r])
+                        await mentioned.add_roles(role, reason=f"User reached level {r}")
 
     async def validate_owner(self, context, function_pass, function_fail=None):
         """ Check if the owner issued the command.
@@ -81,8 +112,7 @@ class Owner(object):
                 warning to the user.
 
         """
-        context = discordion.GeneralContext(context=context)
-        if context.user.id == config.get("bot", "owner_id"):
+        if str(context.author.id) == config.get("bot", "owner_id"):
             await function_pass(context)
         else:
             try:
