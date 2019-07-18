@@ -1,3 +1,5 @@
 discord.py==1.2.2
 youtube_dl==2017.06.12
 git+https://github.com/LeicaSimile/Discordion.git#egg=discordion
+matplotlib==3.1.1
+wordcloud-1.5.0-cp36-cp36m-win32.whl

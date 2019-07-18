@@ -37,7 +37,8 @@ class Bot(discordion.Bot):
     
     def set_commands(self, *cmds):
         self.client.add_cog(commands.Admin(self))
-        
+        self.client.add_cog(commands.Fun(self))
+
         for c in cmds:
             self.client.add_cog(c)
         
