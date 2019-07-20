@@ -4,6 +4,7 @@ import os
 import discord
 from discord.ext import commands
 from wordcloud import WordCloud
+from matplotlib.image import imread
 
 import discordion
 from discordion.settings import config
@@ -23,54 +24,41 @@ class Fun(commands.Cog):
     async def wordcloud(self, context):
         arguments = context.message.content.split()
         messages = []
+        channels = context.guild.text_channels
         now = datetime.datetime.now()
+        days = 14
+        user = None
+        subject = context.guild.name
 
-        if len(arguments) < 2:
-            channel_count = len(context.guild.text_channels)
-            report = await context.channel.send(f"Scanning {channel_count} channels.")
-            
-            for i, channel in enumerate(context.guild.text_channels):
-                try:
-                    async for m in channel.history(limit=None, after=(now - datetime.timedelta(days=14)), oldest_first=False):
-                        if m.author.bot:
-                            continue
-                        messages.append(m.clean_content)
-                except discord.errors.Forbidden:
-                    print(f"Can't access {channel.name}")
-                else:
-                    await report.edit(content=f"Scanned {i}/{channel_count} channels.")
-            
-            await report.delete()
-
-            wc = WordCloud(width=800, height=400)
-            wc.generate(" ".join(messages))
-
-            wc_dir = f"wordcloud/{context.message.guild.id}"
-            os.makedirs(wc_dir, exist_ok=True)
-
-            wc_filename = f"/{now:%Y%m%d%H%M%S}.png"
-            wc.to_file(wc_filename)
-            await context.channel.send(f"A wordcloud for the server's past two weeks:", file=discord.File(wc_filename))
-            return
-        
         if context.message.mentions:
-            pass
+            user = context.message.mentions[0]
+            subject = user.name
         if context.message.channel_mentions:
-            channel = context.message.channel_mentions[0]
+            channels = [context.message.channel_mentions[0]]
+            subject = f"#{channels[0].name}"
+
+        for channel in channels:
             try:
-                async for m in channel.history(limit=None, after=(now - datetime.timedelta(days=14)), oldest_first=False):
+                async for m in channel.history(limit=None, after=(now - datetime.timedelta(days=days)), oldest_first=False):
+                    if user and m.author != user:
+                        continue
                     if m.author.bot:
                         continue
                     messages.append(m.clean_content)
             except discord.errors.Forbidden:
                 print(f"Can't access {channel.name}")
-            else:
-                wc = WordCloud(width=800, height=400)
-                wc.generate(" ".join(messages))
+        
+        if "picture provided" == "":
+            img_mask = imread("wordcloud/mask.png")
+            wc = WordCloud(background_color=None, mask=img_mask, contour_width=2, contour_color="white")
+        else:
+            wc = WordCloud(width=1000, height=400)
 
-                wc_dir = f"wordcloud/{context.message.guild.id}"
-                os.makedirs(wc_dir, exist_ok=True)
+        wc.generate(" ".join(messages))
 
-                wc_filename = f"/{now:%Y%m%d%H%M%S}.png"
-                wc.to_file(wc_filename)
-                await context.channel.send(f"A wordcloud for #{channel}'s past two weeks:", file=discord.File(wc_filename))
+        wc_dir = f"wordcloud/{context.message.guild.id}"
+        os.makedirs(wc_dir, exist_ok=True)
+
+        wc_filename = f"/{now:%Y%m%d%H%M%S}.png"
+        wc.to_file(wc_filename)
+        await context.channel.send(f"A wordcloud for {subject}'s past {days} days:", file=discord.File(wc_filename))
