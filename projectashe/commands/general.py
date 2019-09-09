@@ -7,6 +7,7 @@ from discord.ext import commands
 import discordion
 from discordion.settings import config
 
+URL_REGEX = r"""(?i)\b((?:https?:(?:/{1,3}|[a-z0-9%])|[a-z0-9.\-]+[.](?:com|net|org|edu|gov|mil|aero|asia|biz|cat|coop|info|int|jobs|mobi|museum|name|post|pro|tel|travel|xxx|ac|ad|ae|af|ag|ai|al|am|an|ao|aq|ar|as|at|au|aw|ax|az|ba|bb|bd|be|bf|bg|bh|bi|bj|bm|bn|bo|br|bs|bt|bv|bw|by|bz|ca|cc|cd|cf|cg|ch|ci|ck|cl|cm|cn|co|cr|cs|cu|cv|cx|cy|cz|dd|de|dj|dk|dm|do|dz|ec|ee|eg|eh|er|es|et|eu|fi|fj|fk|fm|fo|fr|ga|gb|gd|ge|gf|gg|gh|gi|gl|gm|gn|gp|gq|gr|gs|gt|gu|gw|gy|hk|hm|hn|hr|ht|hu|id|ie|il|im|in|io|iq|ir|is|it|je|jm|jo|jp|ke|kg|kh|ki|km|kn|kp|kr|kw|ky|kz|la|lb|lc|li|lk|lr|ls|lt|lu|lv|ly|ma|mc|md|me|mg|mh|mk|ml|mm|mn|mo|mp|mq|mr|ms|mt|mu|mv|mw|mx|my|mz|na|nc|ne|nf|ng|ni|nl|no|np|nr|nu|nz|om|pa|pe|pf|pg|ph|pk|pl|pm|pn|pr|ps|pt|pw|py|qa|re|ro|rs|ru|rw|sa|sb|sc|sd|se|sg|sh|si|sj|Ja|sk|sl|sm|sn|so|sr|ss|st|su|sv|sx|sy|sz|tc|td|tf|tg|th|tj|tk|tl|tm|tn|to|tp|tr|tt|tv|tw|tz|ua|ug|uk|us|uy|uz|va|vc|ve|vg|vi|vn|vu|wf|ws|ye|yt|yu|za|zm|zw)/)(?:[^\s()<>{}\[\]]+|\([^\s()]*?\([^\s()]+\)[^\s()]*?\)|\([^\s]+?\))+(?:\([^\s()]*?\([^\s()]+\)[^\s()]*?\)|\([^\s]+?\)|[^\s`!()\[\]{};:\'\".,<>?«»“”‘’])|(?:(?<!@)[a-z0-9]+(?:[.\-][a-z0-9]+)*[.](?:com|net|org|edu|gov|mil|aero|asia|biz|cat|coop|info|int|jobs|mobi|museum|name|post|pro|tel|travel|xxx|ac|ad|ae|af|ag|ai|al|am|an|ao|aq|ar|as|at|au|aw|ax|az|ba|bb|bd|be|bf|bg|bh|bi|bj|bm|bn|bo|br|bs|bt|bv|bw|by|bz|ca|cc|cd|cf|cg|ch|ci|ck|cl|cm|cn|co|cr|cs|cu|cv|cx|cy|cz|dd|de|dj|dk|dm|do|dz|ec|ee|eg|eh|er|es|et|eu|fi|fj|fk|fm|fo|fr|ga|gb|gd|ge|gf|gg|gh|gi|gl|gm|gn|gp|gq|gr|gs|gt|gu|gw|gy|hk|hm|hn|hr|ht|hu|id|ie|il|im|in|io|iq|ir|is|it|je|jm|jo|jp|ke|kg|kh|ki|km|kn|kp|kr|kw|ky|kz|la|lb|lc|li|lk|lr|ls|lt|lu|lv|ly|ma|mc|md|me|mg|mh|mk|ml|mm|mn|mo|mp|mq|mr|ms|mt|mu|mv|mw|mx|my|mz|na|nc|ne|nf|ng|ni|nl|no|np|nr|nu|nz|om|pa|pe|pf|pg|ph|pk|pl|pm|pn|pr|ps|pt|pw|py|qa|re|ro|rs|ru|rw|sa|sb|sc|sd|se|sg|sh|si|sj|Ja|sk|sl|sm|sn|so|sr|ss|st|su|sv|sx|sy|sz|tc|td|tf|tg|th|tj|tk|tl|tm|tn|to|tp|tr|tt|tv|tw|tz|ua|ug|uk|us|uy|uz|va|vc|ve|vg|vi|vn|vu|wf|ws|ye|yt|yu|za|zm|zw)\b/?(?!@)))"""
 
 class Admin(commands.Cog):
     """Commands usable only by the admin."""
@@ -127,6 +128,19 @@ class Admin(commands.Cog):
 
     @commands.Cog.listener()
     async def on_message(self, message):
+        async def check_content(message, check, custom_message):
+            if check:
+                content = message.clean_content
+                try:
+                    await message.delete()
+                except (discord.Forbidden, discord.HTTPException) as e:
+                    print(f"Unable to delete message at {message.jump_url}. {e}")
+                else:
+                    await self.bot.say(message.author, f"{custom_message}\nYour message: ```{content}```")
+                    return True
+
+            return False
+
         user = message.author
         roles = {
             5: 533369804334039061,
@@ -139,15 +153,27 @@ class Admin(commands.Cog):
             533368376148361216: {
                 "pics-only": {
                     548737482108174337: f"To keep #selfies clean, only posts with pictures are allowed. Feel free to post comments in #general!",
-                    538110190902312976: f"To keep #lets-deaw clean, only posts with pictures are allowed. Discuss art in #lets-draw-discussion!"
+                    538110190902312976: f"To keep #lets-draw clean, only posts with pictures are allowed. Discuss art in #lets-draw-discussion!"
                 },
                 "no-pics": {
                     533377545865789441: f"To keep #general clean, posts with pictures are put in #memes-links-pics instead!",
                     535908960713310220: f"To keep #nsfw-chat clean, posts with pictures are put in #nsfw-memes-links-pics instead!"
+                },
+                "no-links": {
+                    533377545865789441: f"To keep #general clean, posts with links are put in #memes-links-pics instead!",
+                    535908960713310220: f"To keep #nsfw-chat clean, posts with links are put in #nsfw-memes-links-pics instead!"
                 }
             }
         }
-        print(f"[{datetime.datetime.now():%H:%M}]({message.guild.name} - {message.channel.name}) {user.name}: {message.content}")
+        if message.guild:
+            print(f"[{datetime.datetime.now():%H:%M}]({message.guild.name} - {message.channel.name}) {user.name}: {message.content}")
+        else:
+            try:
+                print(f"[{datetime.datetime.now():%H:%M}]({message.channel.name}) {user.name}: {message.content}")
+            except AttributeError:
+                print(f"[{datetime.datetime.now():%H:%M}]({user.name}) {message.content}")
+            finally:
+                return
         
         if user.id == 159985870458322944:  # MEE6 Bot
             result = re.compile(r"GG <@(?:.+)>, you just advanced to level ([0-9]+)!").match(message.content)
@@ -159,29 +185,48 @@ class Admin(commands.Cog):
                     if level >= r:
                         role = discord.utils.get(message.guild.roles, id=roles[r])
                         await mentioned.add_roles(role, reason=f"User reached level {r}")
-        elif message.guild.id in servers and message.channel.id in servers[message.guild.id]["pics-only"]:
-            if not message.attachments:
-                content = message.clean_content
-                channel = message.channel
-                guild = message.guild
-                try:
-                    await message.delete()
-                except (discord.Forbidden, discord.HTTPException) as e:
-                    print(f"Unable to delete message at {message.jump_url}. {e}")
-                else:
-                    await self.bot.say(user, f"{servers[guild.id]['pics-only'][channel.id]}\nYour message: ```{content}```")
-        elif message.guild.id in servers and message.channel.id in servers[message.guild.id]["no-pics"]:
-            if message.attachments:
-                content = message.clean_content
-                channel = message.channel
-                guild = message.guild
-                try:
-                    await message.delete()
-                except (discord.Forbidden, discord.HTTPException) as e:
-                    print(f"Unable to delete message at {message.jump_url}. {e}")
-                else:
-                    await self.bot.say(user, f"{servers[guild.id]['no-pics'][channel.id]}\nYour message: ```{content}```")
+        else:
+            guild = message.guild
+            channel = message.channel
 
+            if guild.id in servers and channel.id in servers[guild.id]["pics-only"]:
+                if await check_content(
+                    message,
+                    not message.attachments,
+                    servers[guild.id]["pics-only"][channel.id]
+                ):
+                    return
+            if guild.id in servers and channel.id in servers[guild.id]["no-pics"]:
+                if await check_content(
+                    message,
+                    message.attachments,
+                    servers[guild.id]["no-pics"][channel.id]
+                ):
+                    return
+            if guild.id in servers and channel.id in servers[guild.id]["no-links"]:
+                if await check_content(
+                    message,
+                    re.search(URL_REGEX, message.clean_content),
+                    servers[guild.id]["no-links"][channel.id]
+                ):
+                    return
+    
+    @commands.Cog.listener()
+    async def on_member_update(self, before, after):
+        if after.guild.id == 533368376148361216:
+            before_roles = [r.id for r in before.roles]
+            after_roles = [r.id for r in after.roles]
+            if 533499454964105245 not in before_roles and 533499454964105245 in after_roles:
+                # Say welcome message
+                welcome_channel = discord.utils.get(after.guild.channels, name="general-chat")
+                roles_channel = discord.utils.get(after.guild.channels, name="choose-roles")
+                help_channel = discord.utils.get(after.guild.channels, name="help")
+                moderator_role = discord.utils.get(after.guild.roles, id=535886249458794547)
+                await self.bot.say(welcome_channel,
+                    f"Welcome to the server, {after.mention}! Be sure to check out {roles_channel.mention} to find others with similar interests. If you have any questions, feel free to message a moderator ({moderator_role.name}) or post in {help_channel.mention}.")
+            
+        return
+            
     async def validate_owner(self, context, function_pass, function_fail=None):
         """ Check if the owner issued the command.
 

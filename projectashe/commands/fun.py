@@ -32,15 +32,19 @@ class Fun(commands.Cog):
 
         if context.message.mentions:
             user = context.message.mentions[0]
-            subject = user.name
+            subject = user.display_name
         if context.message.channel_mentions:
             channels = [context.message.channel_mentions[0]]
             subject = f"#{channels[0].name}"
 
+        report = await context.channel.send(f"Scanning {subject}'s past {days} days...")
+
         for channel in channels:
             try:
                 async for m in channel.history(limit=None, after=(now - datetime.timedelta(days=days)), oldest_first=False):
-                    if user and m.author != user:
+                    if user:
+                        if m.author == user:
+                            messages.append(m.clean_content)
                         continue
                     if m.author.bot:
                         continue
@@ -61,4 +65,6 @@ class Fun(commands.Cog):
 
         wc_filename = f"/{now:%Y%m%d%H%M%S}.png"
         wc.to_file(wc_filename)
+
+        await report.delete()
         await context.channel.send(f"A wordcloud for {subject}'s past {days} days:", file=discord.File(wc_filename))
