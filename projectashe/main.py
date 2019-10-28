@@ -7,8 +7,7 @@ logging.config.fileConfig("logging.ini")
 logger = logging.getLogger("main")
 
 def main():
-    FILE_CONFIG = "settings.ini"
-    ashe = Bot(FILE_CONFIG)
+    ashe = Bot()
     ashe.run()
 
 
