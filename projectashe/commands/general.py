@@ -4,8 +4,7 @@ import re
 
 import discord
 from discord.ext import commands
-import discordion
-from discordion.settings import config
+import settings
 
 URL_REGEX = r"""(?i)\b((?:https?:(?:/{1,3}|[a-z0-9%])|[a-z0-9.\-]+[.](?:com|net|org|edu|gov|mil|aero|asia|biz|cat|coop|info|int|jobs|mobi|museum|name|post|pro|tel|travel|xxx|ac|ad|ae|af|ag|ai|al|am|an|ao|aq|ar|as|at|au|aw|ax|az|ba|bb|bd|be|bf|bg|bh|bi|bj|bm|bn|bo|br|bs|bt|bv|bw|by|bz|ca|cc|cd|cf|cg|ch|ci|ck|cl|cm|cn|co|cr|cs|cu|cv|cx|cy|cz|dd|de|dj|dk|dm|do|dz|ec|ee|eg|eh|er|es|et|eu|fi|fj|fk|fm|fo|fr|ga|gb|gd|ge|gf|gg|gh|gi|gl|gm|gn|gp|gq|gr|gs|gt|gu|gw|gy|hk|hm|hn|hr|ht|hu|id|ie|il|im|in|io|iq|ir|is|it|je|jm|jo|jp|ke|kg|kh|ki|km|kn|kp|kr|kw|ky|kz|la|lb|lc|li|lk|lr|ls|lt|lu|lv|ly|ma|mc|md|me|mg|mh|mk|ml|mm|mn|mo|mp|mq|mr|ms|mt|mu|mv|mw|mx|my|mz|na|nc|ne|nf|ng|ni|nl|no|np|nr|nu|nz|om|pa|pe|pf|pg|ph|pk|pl|pm|pn|pr|ps|pt|pw|py|qa|re|ro|rs|ru|rw|sa|sb|sc|sd|se|sg|sh|si|sj|Ja|sk|sl|sm|sn|so|sr|ss|st|su|sv|sx|sy|sz|tc|td|tf|tg|th|tj|tk|tl|tm|tn|to|tp|tr|tt|tv|tw|tz|ua|ug|uk|us|uy|uz|va|vc|ve|vg|vi|vn|vu|wf|ws|ye|yt|yu|za|zm|zw)/)(?:[^\s()<>{}\[\]]+|\([^\s()]*?\([^\s()]+\)[^\s()]*?\)|\([^\s]+?\))+(?:\([^\s()]*?\([^\s()]+\)[^\s()]*?\)|\([^\s]+?\)|[^\s`!()\[\]{};:\'\".,<>?«»“”‘’])|(?:(?<!@)[a-z0-9]+(?:[.\-][a-z0-9]+)*[.](?:com|net|org|edu|gov|mil|aero|asia|biz|cat|coop|info|int|jobs|mobi|museum|name|post|pro|tel|travel|xxx|ac|ad|ae|af|ag|ai|al|am|an|ao|aq|ar|as|at|au|aw|ax|az|ba|bb|bd|be|bf|bg|bh|bi|bj|bm|bn|bo|br|bs|bt|bv|bw|by|bz|ca|cc|cd|cf|cg|ch|ci|ck|cl|cm|cn|co|cr|cs|cu|cv|cx|cy|cz|dd|de|dj|dk|dm|do|dz|ec|ee|eg|eh|er|es|et|eu|fi|fj|fk|fm|fo|fr|ga|gb|gd|ge|gf|gg|gh|gi|gl|gm|gn|gp|gq|gr|gs|gt|gu|gw|gy|hk|hm|hn|hr|ht|hu|id|ie|il|im|in|io|iq|ir|is|it|je|jm|jo|jp|ke|kg|kh|ki|km|kn|kp|kr|kw|ky|kz|la|lb|lc|li|lk|lr|ls|lt|lu|lv|ly|ma|mc|md|me|mg|mh|mk|ml|mm|mn|mo|mp|mq|mr|ms|mt|mu|mv|mw|mx|my|mz|na|nc|ne|nf|ng|ni|nl|no|np|nr|nu|nz|om|pa|pe|pf|pg|ph|pk|pl|pm|pn|pr|ps|pt|pw|py|qa|re|ro|rs|ru|rw|sa|sb|sc|sd|se|sg|sh|si|sj|Ja|sk|sl|sm|sn|so|sr|ss|st|su|sv|sx|sy|sz|tc|td|tf|tg|th|tj|tk|tl|tm|tn|to|tp|tr|tt|tv|tw|tz|ua|ug|uk|us|uy|uz|va|vc|ve|vg|vi|vn|vu|wf|ws|ye|yt|yu|za|zm|zw)\b/?(?!@)))"""
 
@@ -15,7 +14,7 @@ class Admin(commands.Cog):
     def __init__(self, bot):
         """
         Args:
-            bot(discordion.Bot): Bot instance.
+            bot(Bot): Bot instance.
             
         """
         self.bot = bot
@@ -37,7 +36,7 @@ class Admin(commands.Cog):
             else:
                 await report.edit(content=f"Scanned {i}/{channel_count} channels for inactive members.")
 
-        inactive_members = "\n".join([f"{u.display_name}" for u in context.guild.members if u not in senders])
+        inactive_members = "\n".join([f"{u.display_name} ({u.name}#{u.discriminator})" for u in context.guild.members if u not in senders])
         await report.edit(content=f"Scanned {channel_count} channels for inactive members.")
         await context.channel.send(f"Inactive members (2+ weeks since last message): ```{inactive_members}```")
     
@@ -107,7 +106,7 @@ class Admin(commands.Cog):
     async def shutdown(self, context):
         async def log_out(context):
             try:
-                response = self.bot.get_phrase(database.Category.SHUTDOWN.value)
+                response = ""
                 await self.bot.say(context.channel, response, context)
             finally:
                 await self.bot.client.logout()
@@ -117,14 +116,6 @@ class Admin(commands.Cog):
             await self.bot.say(context.channel, response)
 
         await self.validate_owner(context, log_out, sass)
-
-    @commands.command(description="Reread configuration settings")
-    async def reconfig(self, context):
-        async def read_config(context):
-            discordion.settings.read_settings(self.bot.file_config)
-            await self.bot.say(context.channel, "Settings updated.")
-
-        await self.validate_owner(context, read_config)
 
     @commands.Cog.listener()
     async def on_message(self, message):
@@ -196,6 +187,7 @@ class Admin(commands.Cog):
                     servers[guild.id]["pics-only"][channel.id]
                 ):
                     return
+            """
             if guild.id in servers and channel.id in servers[guild.id]["no-pics"]:
                 if await check_content(
                     message,
@@ -210,6 +202,7 @@ class Admin(commands.Cog):
                     servers[guild.id]["no-links"][channel.id]
                 ):
                     return
+            """
     
     @commands.Cog.listener()
     async def on_member_update(self, before, after):
@@ -241,7 +234,7 @@ class Admin(commands.Cog):
                 warning to the user.
 
         """
-        if str(context.author.id) == config.get("bot", "owner_id"):
+        if str(context.author.id) == settings.OWNER_ID:
             await function_pass(context)
         else:
             try:

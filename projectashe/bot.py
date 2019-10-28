@@ -1,39 +1,44 @@
 # -*- coding: utf-8 -*-
 import logging
 import re
-
 import discord
-import discordion
-
 import commands
-from discordion.settings import config
+import settings
 
-
-class Bot(discordion.Bot):
+class Bot(object):
     """
     Args:
         client (discord.Bot): The bot instance.
-        file_config (str): Filepath of config file with bot's settings.
-        
-    Attributes:
-        db (BotDatabase): The bot's database.
         
     """
     
-    def __init__(self, file_config, logger=None, **options):
-        super().__init__(file_config, logger, **options)
+    def __init__(self, logger=None, **options):
+        self.logger = logger or logging.getLogger(__name__)
+        command_prefix = ";"
+        description = settings.DESCRIPTION
+
+        self.client = discord.ext.commands.Bot(command_prefix=command_prefix, description=description, **options)
+
+    def run(self):
+        self.set_events()
+        self.set_commands()
+        self.client.run(settings.CLIENT_TOKEN)
 
     def event_ready(self):
+        """Override on_ready"""
         async def on_ready():
             prefix = config.get("bot", "prefix")
             self.logger.info(f"{self.client.user.name} is now online.")
             self.logger.info(f"ID: {self.client.user.id}")
             self.logger.info(f"Command prefix: {prefix}")
 
-            status = config.get("bot", "status")
+            status = f"DDR | {prefix}help for help"
             await self.client.change_presence(activity=discord.Game(name=status))
 
         return on_ready
+
+    async def say(self, channel, message, context=None):
+        await channel.send(content=message)
     
     def set_commands(self, *cmds):
         self.client.add_cog(commands.Admin(self))
@@ -47,4 +52,3 @@ class Bot(discordion.Bot):
 
         for e in events:
             self.client.event(e)
-            

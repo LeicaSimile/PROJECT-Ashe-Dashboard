@@ -6,16 +6,13 @@ from discord.ext import commands
 from wordcloud import WordCloud
 from matplotlib.image import imread
 
-import discordion
-from discordion.settings import config
-
 class Fun(commands.Cog):
     """Commands for fun."""
 
     def __init__(self, bot):
         """
         Args:
-            bot(discordion.Bot): Bot instance.
+            bot(Bot): Bot instance.
             
         """
         self.bot = bot
