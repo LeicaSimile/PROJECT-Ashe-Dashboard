@@ -27,7 +27,7 @@ class Bot(object):
     def event_ready(self):
         """Override on_ready"""
         async def on_ready():
-            prefix = config.get("bot", "prefix")
+            prefix = ";"
             self.logger.info(f"{self.client.user.name} is now online.")
             self.logger.info(f"ID: {self.client.user.id}")
             self.logger.info(f"Command prefix: {prefix}")
