@@ -56,12 +56,12 @@ class Fun(commands.Cog):
             wc = WordCloud(width=1000, height=400)
 
         wc.generate(" ".join(messages))
-
+        """
         wc_dir = f"wordcloud/{context.message.guild.id}"
         os.makedirs(wc_dir, exist_ok=True)
 
         wc_filename = f"/{now:%Y%m%d%H%M%S}.png"
         wc.to_file(wc_filename)
-
+        """
         await report.delete()
-        await context.channel.send(f"A wordcloud for {subject}'s past {days} days:", file=discord.File(wc_filename))
+        await context.channel.send(f"A wordcloud for {subject}'s past {days} days:", file=discord.File(wc.to_image()))
