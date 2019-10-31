@@ -66,7 +66,7 @@ class Fun(commands.Cog):
         """
         wc_image = wc.to_image()
         b = io.BytesIO()
-        wc_image.save(b, format=wc_image.format)
+        wc_image.save(b, format="PNG")
 
         await report.delete()
         await context.channel.send(f"A wordcloud for {subject}'s past {days} days:", file=discord.File(b.getvalue()))
