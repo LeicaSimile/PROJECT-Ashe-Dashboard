@@ -1,4 +1,5 @@
 import datetime
+import io
 import os
 
 import discord
@@ -63,5 +64,9 @@ class Fun(commands.Cog):
         wc_filename = f"/{now:%Y%m%d%H%M%S}.png"
         wc.to_file(wc_filename)
         """
+        wc_image = wc.to_image()
+        b = io.BytesIO()
+        wc_image.save(b, "png")
+
         await report.delete()
-        await context.channel.send(f"A wordcloud for {subject}'s past {days} days:", file=discord.File(wc.to_image()))
+        await context.channel.send(f"A wordcloud for {subject}'s past {days} days:", file=discord.File(b.getvalue()))
