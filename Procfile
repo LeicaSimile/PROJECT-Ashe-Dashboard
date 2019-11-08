@@ -1,1 +1,1 @@
-worker: python projectashe/main.py
+worker: python bot/main.py
