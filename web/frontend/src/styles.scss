@@ -1,2 +1,10 @@
 /* You can add global styles to this file, and also import other style files */
-@import "../node_modules/bulma/css/bulma.css";
+$white: hsl(0, 0, 96);
+$blue: hsl(230, 70, 20);
+$blue-primary: hsl(190, 80, 48);
+
+$text: $white;
+$text-strong: $white;
+$primary: $blue-primary;
+$body-background-color: $blue;
+@import "../node_modules/bulma/bulma.sass";
