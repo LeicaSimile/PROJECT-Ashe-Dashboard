@@ -18,6 +18,4 @@ import { Component } from '@angular/core';
     }
   `]
 })
-export class AppComponent {
-  title = 'PROJECT Ashe';
-}
+export class AppComponent {}
