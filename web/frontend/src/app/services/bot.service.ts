@@ -6,4 +6,8 @@ import { Injectable } from '@angular/core';
 export class BotService {
   botName = 'PROJECT Ashe';
   constructor() { }
+
+  getStatus() {
+    return;
+  }
 }
