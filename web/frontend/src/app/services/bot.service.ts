@@ -10,4 +10,8 @@ export class BotService {
   getStatus() {
     return;
   }
+
+  getNumberServers(): number {
+    return 1;
+  }
 }
