@@ -10,3 +10,7 @@ $text-strong: $white;
 $primary: $blue-primary;
 $body-background-color: $blue-background;
 @import "../node_modules/bulma/bulma.sass";
+
+main {
+    padding-top: 2rem;
+}
