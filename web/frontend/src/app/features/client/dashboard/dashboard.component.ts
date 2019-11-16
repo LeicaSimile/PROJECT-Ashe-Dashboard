@@ -2,8 +2,7 @@ import { Component, OnInit } from '@angular/core';
 
 @Component({
   selector: 'app-dashboard',
-  template: '',
-  styles: ['']
+  template: ``
 })
 export class DashboardComponent implements OnInit {
 
