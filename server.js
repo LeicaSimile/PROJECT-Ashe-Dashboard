@@ -2,7 +2,11 @@ const fastify = require('fastify')();
 const path = require('path');
 
 fastify.register(require('fastify-static'), {
-  root: path.join(__dirname, 'dist')
+    root: path.join(__dirname, 'dist', 'projectashe')
+});
+
+fastify.get('/', function (req, reply) {
+    reply.sendFile('index.html');
 });
 
 const start = async () => {
