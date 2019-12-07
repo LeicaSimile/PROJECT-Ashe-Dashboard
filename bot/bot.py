@@ -22,7 +22,7 @@ class Bot(object):
     def run(self):
         self.set_events()
         self.set_commands()
-        self.client.run(settings.CLIENT_TOKEN)
+        self.client.run(settings.CLIENT_TOKEN, reconnect=True)
 
     def event_ready(self):
         """Override on_ready"""
