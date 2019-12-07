@@ -15,7 +15,9 @@ import { Component, OnInit } from '@angular/core';
       </div>
       <div class="level-right">
         <div class="level-item">
-          <button class="button is-primary is-outlined">Login</button>
+          <form>
+            <button class="button is-primary is-outlined" formaction="http://localhost:3000/api/login">Login</button>
+          </form>
         </div>
       </div>
     </nav>
