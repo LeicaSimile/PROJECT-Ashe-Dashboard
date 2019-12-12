@@ -8,6 +8,10 @@ const routes: Routes = [
     path: '',
     component: HomeComponent,
     pathMatch: 'full'
+  },
+  {
+    path: 'client',
+    loadChildren: () => import('./features/client/client.module').then(m => m.ClientModule)
   }
 ];
 
