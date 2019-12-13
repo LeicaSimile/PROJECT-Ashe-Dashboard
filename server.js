@@ -5,7 +5,7 @@ fastify.register(require('fastify-static'), {
     root: path.join(__dirname, 'dist', 'projectashe')
 });
 
-fastify.get('/', function (req, reply) {
+fastify.get('/*', function (req, reply) {
     reply.sendFile('index.html');
 });
 
