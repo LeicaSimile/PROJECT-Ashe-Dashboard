@@ -62,8 +62,9 @@ class Fun(commands.Cog):
         os.makedirs(wc_dir, exist_ok=True)
 
         wc_filename = f"{now:%Y%m%d%H%M%S}.png"
-        wc.to_file(os.path.join(wc_dir, wc_filename))
+        wc_filepath = os.path.join(wc_dir, wc_filename)
+        wc.to_file(wc_filepath)
 
         await report.delete()
-        await context.channel.send(f"A wordcloud for {subject}'s past {days} days:", file=discord.File(wc_filename))
+        await context.channel.send(f"A wordcloud for {subject}'s past {days} days:", file=discord.File(wc_filepath))
         
