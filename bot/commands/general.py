@@ -42,12 +42,12 @@ class Admin(commands.Cog):
 
         inactive_members = "\n".join([f"{u.display_name} ({u.name}#{u.discriminator})" for u in context.guild.members if u not in senders])
         await progress_msg.edit(content=f"Scanned {channel_count} channels for inactive members.")
-        report = await context.channel.send(f"{context.author.mention} Inactive members (2+ weeks since last message): ```{inactive_members}```\nReact below to notify them")
+        report = await context.channel.send(f"{context.author.mention} Inactive members (2+ weeks since last message): ```{inactive_members}```\nReact below to notify them.")
         await report.add_reaction("📧")
 
         try:
-            reaction, user = await client.wait_for("reaction_add", timeout=60, check=check)
-        except asyincio.TimeoutError:
+            reaction, user = await self.bot.client.wait_for("reaction_add", timeout=60, check=check)
+        except asyncio.TimeoutError:
             await report.edit(content=f"Inactive members (2+ weeks since last message): ```{inactive_members}```")
             await report.clear_reactions()
         else:
