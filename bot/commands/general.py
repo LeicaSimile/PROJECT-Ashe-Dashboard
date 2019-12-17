@@ -24,7 +24,7 @@ class Admin(commands.Cog):
         senders = []
         now = datetime.datetime.now()
         channel_count = len(context.guild.text_channels)
-        report = await context.channel.send(f"Scanning {channel_count} channels for inactive members.")
+        progress_msg = await context.channel.send(f"Scanning {channel_count} channels for inactive members.")
         
         for i, channel in enumerate(context.guild.text_channels):
             try:
@@ -34,11 +34,20 @@ class Admin(commands.Cog):
             except discord.errors.Forbidden:
                 print(f"Can't access {channel.name}")
             else:
-                await report.edit(content=f"Scanned {i}/{channel_count} channels for inactive members.")
+                await progress_msg.edit(content=f"Scanned {i}/{channel_count} channels for inactive members.")
 
         inactive_members = "\n".join([f"{u.display_name} ({u.name}#{u.discriminator})" for u in context.guild.members if u not in senders])
-        await report.edit(content=f"Scanned {channel_count} channels for inactive members.")
-        await context.channel.send(f"{context.author.mention} Inactive members (2+ weeks since last message): ```{inactive_members}```")
+        await progress_msg.edit(content=f"Scanned {channel_count} channels for inactive members.")
+        report = await context.channel.send(f"{context.author.mention} Inactive members (2+ weeks since last message): ```{inactive_members}```\nReact below to notify them")
+        await report.add_reaction("📧")
+
+        try:
+            pass
+        except asyincio.TimeoutError:
+            await report.edit(content=f"Inactive members (2+ weeks since last message): ```{inactive_members}```")
+            await report.clear_reactions()
+        else:
+            await context.channel.send(f"k")
     
     @commands.command(description="Notifies all purgelist members on their inactivity.")
     async def purgenotify(self, context):
@@ -53,28 +62,6 @@ class Admin(commands.Cog):
 
         messaged = "\n".join([f"{u.display_name} ({u.name}#{u.discriminator})" for u in to_notify])
         await context.channel.send(f"Notified the following inactive members: ```{messaged}```")
-
-    @commands.command(description="Deletes all messages from non-members (excluding pinned messages).")
-    async def purgemessages(self, context):
-        def is_gone(m):
-            return m.author not in m.guild.members
-
-        channel_count = len(context.guild.text_channels)
-        report = await context.channel.send(f"Scanning {channel_count} channels for messages from non-members.")
-
-        for i, channel in enumerate(context.guild.text_channels):
-            await report.edit(content=f"Purging #{channel.name}... ({i}/{channel_count} channels)")
-            try:
-                await channel.purge(limit=None, check=is_gone)
-            except discord.errors.Forbidden:
-                channel_count -= 1
-                print(f"Can't access {channel.name}")
-                continue
-            except:
-                await context.channel.send("Something went wrong. Cancelling the purge.")
-                return
-
-        await report.edit(content=f"Purged {channel_count}/{len(context.guild.text_channels)} channels.")
 
     @commands.command(description="Have you tried turning it off and on?")
     async def restart(self, context):
