@@ -21,6 +21,9 @@ class Admin(commands.Cog):
 
     @commands.command(description="Sends a list of inactive members in the server.")
     async def purgelist(self, context):
+        def check(reaction, user):
+            return user == context.message.author and str(reaction.emoji == "📧")
+            
         senders = []
         now = datetime.datetime.now()
         channel_count = len(context.guild.text_channels)
@@ -42,7 +45,7 @@ class Admin(commands.Cog):
         await report.add_reaction("📧")
 
         try:
-            pass
+            reaction, user = await client.wait_for("reaction_add", timeout=60, check=check)
         except asyincio.TimeoutError:
             await report.edit(content=f"Inactive members (2+ weeks since last message): ```{inactive_members}```")
             await report.clear_reactions()
