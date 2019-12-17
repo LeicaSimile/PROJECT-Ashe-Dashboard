@@ -38,12 +38,13 @@ class Admin(commands.Cog):
 
         inactive_members = "\n".join([f"{u.display_name} ({u.name}#{u.discriminator})" for u in context.guild.members if u not in senders])
         await report.edit(content=f"Scanned {channel_count} channels for inactive members.")
-        await context.channel.send(f"Inactive members (2+ weeks since last message): ```{inactive_members}```")
+        await context.channel.send(f"{context.author.mention} Inactive members (2+ weeks since last message): ```{inactive_members}```")
     
     @commands.command(description="Notifies all purgelist members on their inactivity.")
     async def purgenotify(self, context):
         mod_role = discord.utils.find(lambda r: r.id == 535886249458794547, context.guild.roles)
         to_notify = mod_role.members
+
 
         for member in to_notify:
             await member.send(
