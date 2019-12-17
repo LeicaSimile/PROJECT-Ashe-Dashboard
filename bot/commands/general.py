@@ -1,3 +1,4 @@
+import asyncio
 import datetime
 import time
 import re
@@ -22,8 +23,8 @@ class Admin(commands.Cog):
     @commands.command(description="Sends a list of inactive members in the server.")
     async def purgelist(self, context):
         def check(reaction, user):
-            return user == context.message.author and str(reaction.emoji == "📧")
-            
+            return reaction.message == report and user == context.message.author and str(reaction.emoji == "📧")
+
         senders = []
         now = datetime.datetime.now()
         channel_count = len(context.guild.text_channels)
