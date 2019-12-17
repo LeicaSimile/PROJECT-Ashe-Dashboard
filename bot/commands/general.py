@@ -40,6 +40,19 @@ class Admin(commands.Cog):
         await report.edit(content=f"Scanned {channel_count} channels for inactive members.")
         await context.channel.send(f"Inactive members (2+ weeks since last message): ```{inactive_members}```")
     
+    @commands.command(description="Notifies all purgelist members on their inactivity.")
+    async def purgenotify(self, context):
+        mod_role = discord.utils.find(lambda r: r.id == 535886249458794547, context.guild.roles)
+        to_notify = mod_role.members
+
+        for member in to_notify:
+            await member.send(
+                content=f"Hello, we noticed you haven't been active for a while at {context.guild.name}. We have a policy of kicking inactive members, but if you're taking a break, that's alright. Just let a moderator ({mod_role.name}) know and we'll make sure to exempt you"
+            )
+
+        messaged = "\n".join([f"{u.display_name} ({u.name}#{u.discriminator})" for u in to_notify])
+        await context.channel.send(f"Notified the following inactive members: ```{messaged}```")
+
     @commands.command(description="Deletes all messages from non-members (excluding pinned messages).")
     async def purgemessages(self, context):
         def is_gone(m):
@@ -61,40 +74,6 @@ class Admin(commands.Cog):
                 return
 
         await report.edit(content=f"Purged {channel_count}/{len(context.guild.text_channels)} channels.")
-
-    @commands.command(description="Gives a role to a member.", usage="[user ID] [role name]")
-    async def addrole(self, context):
-        async def give_role(context):
-            msg_parts = context.message.content.split(" ", 2)
-            try:
-                user = discord.utils.get(context.guild.members, id=int(msg_parts[1]))
-                role = discord.utils.get(context.guild.roles, name=msg_parts[2])
-                await user.add_roles(role, reason="My owner told me to.")
-            except IndexError:
-                await self.bot.say(context.channel, "Say: ;addrole [user ID] [role name]")
-            except AttributeError:
-                await self.bot.say(context.channel, f"Couldn't find user ID {msg_parts[1]}.")
-            else:
-                await context.message.add_reaction(u"\U0001F44D")
-                
-        await self.validate_owner(context, give_role)
-
-    @commands.command(description="Removes a role from a member.", usage="[user ID] [role name]")
-    async def removerole(self, context):
-        async def remove_role(context):
-            msg_parts = context.message.content.split(" ", 2)
-            try:
-                user = discord.utils.get(context.guild.members, id=int(msg_parts[1]))
-                role = discord.utils.get(context.guild.roles, name=msg_parts[2])
-                await user.remove_roles(role, reason="My owner told me to.")
-            except IndexError:
-                await self.bot.say(context.channel, "Say: ;removerole [user ID] [role name]")
-            except AttributeError:
-                await self.bot.say(context.channel, f"Couldn't find user ID {msg_parts[1]}.")
-            else:
-                await context.message.add_reaction(u"\U0001F44D")
-                
-        await self.validate_owner(context, remove_role)
 
     @commands.command(description="Have you tried turning it off and on?")
     async def restart(self, context):
