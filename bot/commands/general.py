@@ -61,7 +61,7 @@ class Admin(commands.Cog):
         def check(reaction, user):
             return reaction.message.id == report.id and user == context.message.author and str(reaction.emoji == "📧")
 
-        inactive_members = await get_inactive_members(context)
+        inactive_members = await self.get_inactive_members(context)
         inactive_list = "\n".join([f"{u.display_name} ({u.name}#{u.discriminator})" for u in inactive_members])
         report = await context.channel.send(f"{context.author.mention} Inactive members (2+ weeks since last message): ```{inactive_list}```\nReact below to notify them.")
         await report.add_reaction("📧")
@@ -79,7 +79,7 @@ class Admin(commands.Cog):
         mod_role = discord.utils.find(lambda r: r.id == 535886249458794547, context.guild.roles)
         to_notify = mod_role.members
 
-        await notify_members(context, to_notify)
+        await self.notify_members(context, to_notify)
 
     @commands.command(description="Have you tried turning it off and on?")
     async def restart(self, context):
