@@ -37,8 +37,9 @@ class Admin(commands.Cog):
                         senders.append(m.author)
             except discord.errors.Forbidden:
                 print(f"Can't access {channel.name}")
-            elif progress_msg:
-                await progress_msg.edit(content=f"Scanned {i}/{channel_count} channels for inactive members.")
+            else:
+                if progress_msg:
+                    await progress_msg.edit(content=f"Scanned {i}/{channel_count} channels for inactive members.")
         
         if progress_msg:
             await progress_msg.edit(content=f"Scanned {channel_count} channels for inactive members.")
