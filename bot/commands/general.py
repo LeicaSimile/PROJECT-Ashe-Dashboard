@@ -58,7 +58,7 @@ class Admin(commands.Cog):
     @commands.command(description="Sends a list of inactive members in the server.")
     async def purgelist(self, context):
         def check(reaction, user):
-            return reaction.message.id == report.id and user == context.message.author and str(reaction.emoji == "📧")
+            return reaction.message.id == report.id and user == context.message.author and str(reaction.emoji) == "📧"
 
         inactive_members = await self.get_inactive_members(context)
         inactive_list = "\n".join([f"{u.display_name} ({u.name}#{u.discriminator})" for u in inactive_members])
