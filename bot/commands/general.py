@@ -76,7 +76,7 @@ class Admin(commands.Cog):
     @commands.command(description="Notifies all purgelist members on their inactivity.")
     async def purgenotify(self, context):
         mod_role = discord.utils.find(lambda r: r.id == 535886249458794547, context.guild.roles)
-        to_notify = mod_role.members
+        to_notify = await self.get_inactive_members(context)
         message = f"Hello, we noticed you haven't been active for a while at ***{context.guild.name}***.\n\nWe have a policy of **kicking inactive members**, but if you're taking a break, that's alright. **Just let a moderator *({mod_role.name})* know** and we'll make sure to exempt you.\n\n(Do not reply here. This is an automated message and any replies will be ignored)"
 
         await self.notify_members(context, to_notify, message)
