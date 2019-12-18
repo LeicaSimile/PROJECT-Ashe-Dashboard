@@ -1,5 +1,6 @@
 import os
 
+DATABASE_URL = os.environ["DATABASE_URL"]
 CLIENT_ID = os.environ["CLIENT_ID"]
 CLIENT_SECRET = os.environ["CLIENT_SECRET"]
 CLIENT_TOKEN = os.environ["CLIENT_TOKEN"]

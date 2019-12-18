@@ -4,6 +4,7 @@ import re
 import discord
 import commands
 import settings
+import psycopg2
 from imgurpython import ImgurClient
 
 class Bot(object):
