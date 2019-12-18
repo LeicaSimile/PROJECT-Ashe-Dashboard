@@ -20,15 +20,15 @@ class Admin(commands.Cog):
         """
         self.bot = bot
 
-    @commands.command(description="Sends a list of inactive members in the server.")
-    async def purgelist(self, context):
-        def check(reaction, user):
-            return reaction.message.id == report.id and user == context.message.author and str(reaction.emoji == "📧")
-
+    async def get_inactive_members(self, context, progress_report=True):
+        """Returns a list of inactive members."""
         senders = []
         now = datetime.datetime.now()
         channel_count = len(context.guild.text_channels)
-        progress_msg = await context.channel.send(f"Scanning {channel_count} channels for inactive members.")
+        progress_msg = None
+
+        if progress_report:
+            progress_msg = await context.channel.send(f"Scanning {channel_count} channels for inactive members.")
         
         for i, channel in enumerate(context.guild.text_channels):
             try:
@@ -37,18 +37,38 @@ class Admin(commands.Cog):
                         senders.append(m.author)
             except discord.errors.Forbidden:
                 print(f"Can't access {channel.name}")
-            else:
+            elif progress_msg:
                 await progress_msg.edit(content=f"Scanned {i}/{channel_count} channels for inactive members.")
+        
+        if progress_msg:
+            await progress_msg.edit(content=f"Scanned {channel_count} channels for inactive members.")
 
-        inactive_members = "\n".join([f"{u.display_name} ({u.name}#{u.discriminator})" for u in context.guild.members if u not in senders])
-        await progress_msg.edit(content=f"Scanned {channel_count} channels for inactive members.")
-        report = await context.channel.send(f"{context.author.mention} Inactive members (2+ weeks since last message): ```{inactive_members}```\nReact below to notify them.")
+        return [u for u in context.guild.members if u not in senders]
+
+    async def notify_members(self, context, members):
+        message = f"Hello, we noticed you haven't been active for a while at {context.guild.name}. We have a policy of kicking inactive members, but if you're taking a break, that's alright. Just let a moderator ({mod_role.name}) know and we'll make sure to exempt you"
+        for member in members:
+            await member.send(
+                content=message
+            )
+        
+        messaged = "\n".join([f"{m.display_name} ({m.name}#{m.discriminator})" for m in members])
+        await context.channel.send(f"Notified the following inactive members: ```{messaged}```")
+
+    @commands.command(description="Sends a list of inactive members in the server.")
+    async def purgelist(self, context):
+        def check(reaction, user):
+            return reaction.message.id == report.id and user == context.message.author and str(reaction.emoji == "📧")
+
+        inactive_members = await get_inactive_members(context)
+        inactive_list = "\n".join([f"{u.display_name} ({u.name}#{u.discriminator})" for u in inactive_members])
+        report = await context.channel.send(f"{context.author.mention} Inactive members (2+ weeks since last message): ```{inactive_list}```\nReact below to notify them.")
         await report.add_reaction("📧")
 
         try:
             reaction, user = await self.bot.client.wait_for("reaction_add", timeout=60, check=check)
         except asyncio.TimeoutError:
-            await report.edit(content=f"Inactive members (2+ weeks since last message): ```{inactive_members}```")
+            await report.edit(content=f"Inactive members (2+ weeks since last message): ```{inactive_list}```")
             await report.clear_reactions()
         else:
             await context.channel.send(f"k")
@@ -58,14 +78,7 @@ class Admin(commands.Cog):
         mod_role = discord.utils.find(lambda r: r.id == 535886249458794547, context.guild.roles)
         to_notify = mod_role.members
 
-
-        for member in to_notify:
-            await member.send(
-                content=f"Hello, we noticed you haven't been active for a while at {context.guild.name}. We have a policy of kicking inactive members, but if you're taking a break, that's alright. Just let a moderator ({mod_role.name}) know and we'll make sure to exempt you"
-            )
-
-        messaged = "\n".join([f"{u.display_name} ({u.name}#{u.discriminator})" for u in to_notify])
-        await context.channel.send(f"Notified the following inactive members: ```{messaged}```")
+        await notify_members(context, to_notify)
 
     @commands.command(description="Have you tried turning it off and on?")
     async def restart(self, context):
