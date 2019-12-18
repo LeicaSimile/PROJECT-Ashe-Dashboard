@@ -46,8 +46,7 @@ class Admin(commands.Cog):
 
         return [u for u in context.guild.members if u not in senders]
 
-    async def notify_members(self, context, members):
-        message = f"Hello, we noticed you haven't been active for a while at {context.guild.name}. We have a policy of kicking inactive members, but if you're taking a break, that's alright. Just let a moderator ({mod_role.name}) know and we'll make sure to exempt you"
+    async def notify_members(self, context, members, message):
         for member in members:
             await member.send(
                 content=message
@@ -78,8 +77,9 @@ class Admin(commands.Cog):
     async def purgenotify(self, context):
         mod_role = discord.utils.find(lambda r: r.id == 535886249458794547, context.guild.roles)
         to_notify = mod_role.members
+        message = f"Hello, we noticed you haven't been active for a while at {context.guild.name}. We have a policy of kicking inactive members, but if you're taking a break, that's alright. Just let a moderator ({mod_role.name}) know and we'll make sure to exempt you"
 
-        await self.notify_members(context, to_notify)
+        await self.notify_members(context, to_notify, message)
 
     @commands.command(description="Have you tried turning it off and on?")
     async def restart(self, context):
