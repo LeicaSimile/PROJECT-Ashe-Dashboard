@@ -55,6 +55,29 @@ class Admin(commands.Cog):
         messaged = "\n".join([f"{m.display_name} ({m.name}#{m.discriminator})" for m in members])
         await context.channel.send(f"Notified the following inactive members: ```{messaged}```")
 
+    async def validate_owner(self, context, function_pass, function_fail=None):
+        """Check if the owner issued the command.
+
+        Args:
+            context (discord.Context): Context of the command.
+            function_pass (func): Function to call if check passes.
+                Must be a coroutine that accepts a GeneralContext object
+                as an argument.
+            function_fail (func, optional): Function to call if check fails.
+                Must be a coroutine that accepts a GeneralContext object
+                as an argument. If none provided, bot will give a stock
+                warning to the user.
+
+        """
+        if str(context.author.id) == settings.OWNER_ID:
+            await function_pass(context)
+        else:
+            try:
+                await function_fail(context)
+            except TypeError:
+                response = "Don't tell me what to do."
+                await self.bot.say(context.channel, response)
+                
     @commands.command(description="Sends a list of inactive members in the server.")
     async def purgelist(self, context):
         def check(reaction, user):
@@ -204,27 +227,4 @@ class Admin(commands.Cog):
                     f"Welcome to the server, {after.mention}! Be sure to check out {roles_channel.mention} to find others with similar interests. If you have any questions, feel free to message a moderator ({moderator_role.name}) or post in {help_channel.mention}.")
             
         return
-            
-    async def validate_owner(self, context, function_pass, function_fail=None):
-        """ Check if the owner issued the command.
-
-        Args:
-            context (discord.Context): Context of the command.
-            function_pass (func): Function to call if check passes.
-                Must be a coroutine that accepts a GeneralContext object
-                as an argument.
-            function_fail (func, optional): Function to call if check fails.
-                Must be a coroutine that accepts a GeneralContext object
-                as an argument. If none provided, bot will give a stock
-                warning to the user.
-
-        """
-        if str(context.author.id) == settings.OWNER_ID:
-            await function_pass(context)
-        else:
-            try:
-                await function_fail(context)
-            except TypeError:
-                response = "Don't tell me what to do."
-                await self.bot.say(context.channel, response)
     
