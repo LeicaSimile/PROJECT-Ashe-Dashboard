@@ -110,7 +110,7 @@ class Admin(commands.Cog):
 
     @commands.command(description="Send a message through me.")
     async def message(self, context):
-       arguments = context.message.raw_content.split(maxsplit=2)
+       arguments = context.message.content.split(maxsplit=2)
        await context.channel.send(f"{a}\n" for a in arguments)
 
     @commands.command(description="Shut me down :c")
