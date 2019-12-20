@@ -147,13 +147,17 @@ class Admin(commands.Cog):
         msg = ""
 
         try:
-            destination_id = int(arguments[1].strip("<># "))
+            destination_id = arguments[1]
         except IndexError:
             destination_id = await get_destination(context)
             if not destination_id:
                 return
+
+        try:
+            destination_id = int(destination_id.strip("<># "))
         except ValueError:
             await context.channel.send("I couldn't find that channel on this server.")
+            return
 
         try:
             msg = arguments[2]
