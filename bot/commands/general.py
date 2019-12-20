@@ -8,9 +8,12 @@ from discord.ext import commands
 import settings
 
 URL_REGEX = r"""(?i)\b((?:https?:(?:/{1,3}|[a-z0-9%])|[a-z0-9.\-]+[.](?:com|net|org|edu|gov|mil|aero|asia|biz|cat|coop|info|int|jobs|mobi|museum|name|post|pro|tel|travel|xxx|ac|ad|ae|af|ag|ai|al|am|an|ao|aq|ar|as|at|au|aw|ax|az|ba|bb|bd|be|bf|bg|bh|bi|bj|bm|bn|bo|br|bs|bt|bv|bw|by|bz|ca|cc|cd|cf|cg|ch|ci|ck|cl|cm|cn|co|cr|cs|cu|cv|cx|cy|cz|dd|de|dj|dk|dm|do|dz|ec|ee|eg|eh|er|es|et|eu|fi|fj|fk|fm|fo|fr|ga|gb|gd|ge|gf|gg|gh|gi|gl|gm|gn|gp|gq|gr|gs|gt|gu|gw|gy|hk|hm|hn|hr|ht|hu|id|ie|il|im|in|io|iq|ir|is|it|je|jm|jo|jp|ke|kg|kh|ki|km|kn|kp|kr|kw|ky|kz|la|lb|lc|li|lk|lr|ls|lt|lu|lv|ly|ma|mc|md|me|mg|mh|mk|ml|mm|mn|mo|mp|mq|mr|ms|mt|mu|mv|mw|mx|my|mz|na|nc|ne|nf|ng|ni|nl|no|np|nr|nu|nz|om|pa|pe|pf|pg|ph|pk|pl|pm|pn|pr|ps|pt|pw|py|qa|re|ro|rs|ru|rw|sa|sb|sc|sd|se|sg|sh|si|sj|Ja|sk|sl|sm|sn|so|sr|ss|st|su|sv|sx|sy|sz|tc|td|tf|tg|th|tj|tk|tl|tm|tn|to|tp|tr|tt|tv|tw|tz|ua|ug|uk|us|uy|uz|va|vc|ve|vg|vi|vn|vu|wf|ws|ye|yt|yu|za|zm|zw)/)(?:[^\s()<>{}\[\]]+|\([^\s()]*?\([^\s()]+\)[^\s()]*?\)|\([^\s]+?\))+(?:\([^\s()]*?\([^\s()]+\)[^\s()]*?\)|\([^\s]+?\)|[^\s`!()\[\]{};:\'\".,<>?«»“”‘’])|(?:(?<!@)[a-z0-9]+(?:[.\-][a-z0-9]+)*[.](?:com|net|org|edu|gov|mil|aero|asia|biz|cat|coop|info|int|jobs|mobi|museum|name|post|pro|tel|travel|xxx|ac|ad|ae|af|ag|ai|al|am|an|ao|aq|ar|as|at|au|aw|ax|az|ba|bb|bd|be|bf|bg|bh|bi|bj|bm|bn|bo|br|bs|bt|bv|bw|by|bz|ca|cc|cd|cf|cg|ch|ci|ck|cl|cm|cn|co|cr|cs|cu|cv|cx|cy|cz|dd|de|dj|dk|dm|do|dz|ec|ee|eg|eh|er|es|et|eu|fi|fj|fk|fm|fo|fr|ga|gb|gd|ge|gf|gg|gh|gi|gl|gm|gn|gp|gq|gr|gs|gt|gu|gw|gy|hk|hm|hn|hr|ht|hu|id|ie|il|im|in|io|iq|ir|is|it|je|jm|jo|jp|ke|kg|kh|ki|km|kn|kp|kr|kw|ky|kz|la|lb|lc|li|lk|lr|ls|lt|lu|lv|ly|ma|mc|md|me|mg|mh|mk|ml|mm|mn|mo|mp|mq|mr|ms|mt|mu|mv|mw|mx|my|mz|na|nc|ne|nf|ng|ni|nl|no|np|nr|nu|nz|om|pa|pe|pf|pg|ph|pk|pl|pm|pn|pr|ps|pt|pw|py|qa|re|ro|rs|ru|rw|sa|sb|sc|sd|se|sg|sh|si|sj|Ja|sk|sl|sm|sn|so|sr|ss|st|su|sv|sx|sy|sz|tc|td|tf|tg|th|tj|tk|tl|tm|tn|to|tp|tr|tt|tv|tw|tz|ua|ug|uk|us|uy|uz|va|vc|ve|vg|vi|vn|vu|wf|ws|ye|yt|yu|za|zm|zw)\b/?(?!@)))"""
+MOD_ROLE_ID = 535886249458794547
 
 async def validate_access(context, user):
     """Checks if user has permission to use command."""
+    if discord.utils.find(lambda r: r.id == MOD_ROLE_ID, user.roles):
+        return True
     return False
 
 class Admin(commands.Cog):
@@ -87,6 +90,9 @@ class Admin(commands.Cog):
         def check(reaction, user):
             return reaction.message.id == report.id and user == context.message.author and str(reaction.emoji) == "📧"
 
+        if not validate_access(context, context.message.author):
+            return
+
         inactive_members = await self.get_inactive_members(context)
         inactive_list = "\n".join([f"{u.display_name} ({u.name}#{u.discriminator})" for u in inactive_members])
         report = await context.channel.send(f"{context.author.mention} Inactive members (2+ weeks since last message): ```{inactive_list}```\nReact below to notify them.")
@@ -102,7 +108,10 @@ class Admin(commands.Cog):
     
     @commands.command(description="Notifies all purgelist members on their inactivity.")
     async def purgenotify(self, context):
-        mod_role = discord.utils.find(lambda r: r.id == 535886249458794547, context.guild.roles)
+        if not validate_access(context, context.message.author):
+            return
+
+        mod_role = discord.utils.find(lambda r: r.id == MOD_ROLE_ID, context.guild.roles)
         to_notify = await self.get_inactive_members(context)
         message = f"Hello, we noticed you haven't been active for a while at ***{context.guild.name}***.\n\nWe have a policy of **kicking inactive members**, but if you're taking a break, that's alright. **Just let a moderator *({mod_role.name})* know** and we'll make sure to exempt you.\n\n(Do not reply here. This is an automated message and any replies will be ignored)"
 
@@ -110,8 +119,52 @@ class Admin(commands.Cog):
 
     @commands.command(description="Send a message through me.")
     async def message(self, context):
-       arguments = context.message.content.split(maxsplit=2)
-       await context.channel.send("\n".join(arguments))
+        async def get_destination(context):
+            def check_destination(msg):
+                return msg.author.id == context.message.author.id and msg.channel.id == context.channel.id and msg.channel_mentions
+
+            await context.channel.send("Which channel should the message be sent to?")
+            try:
+                return await self.bot.client.wait_for("message", timeout=60, check=check_destination)
+            except asyncio.TimeoutError:
+                return False
+
+        async def get_message(context):
+            def check_message(msg):
+                return msg.author.id == context.message.author.id and msg.channel.id == context.channel.id
+
+            await context.channel.send("What's your message?")
+            try:
+                return await self.bot.client.wait_for("message", timeout=60, check=check_message)
+            except asyncio.TimeoutError:
+                return False
+
+        if not validate_access(context, context.message.author):
+            return
+
+        arguments = context.message.content.split(maxsplit=2)
+        destination_id = None
+        msg = ""
+
+        try:
+            destination_id = arguments[1]
+        except IndexError:
+            destination_id = await get_destination(context)
+            if not destination_id:
+                return
+
+        try:
+            msg = arguments[2]
+        except IndexError:
+            msg = await get_message(context)
+            if not msg:
+                return
+        
+        destination = discord.utils.find(lambda c: c.id == destination_id, context.guild.text_channels)
+        if not destination:
+            await context.channel.send(f"I couldn't find that channel on this server.")
+        
+        await destination.send(msg)
 
     @commands.command(description="Shut me down :c")
     async def shutdown(self, context):
