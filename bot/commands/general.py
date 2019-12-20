@@ -126,7 +126,8 @@ class Admin(commands.Cog):
 
             await context.channel.send("Which channel should the message be sent to?")
             try:
-                return await self.bot.client.wait_for("message", timeout=60, check=check_destination).content
+                destination = await self.bot.client.wait_for("message", timeout=60, check=check_destination)
+                return destination.content
             except asyncio.TimeoutError:
                 return False
 
