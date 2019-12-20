@@ -13,9 +13,7 @@ GUILD_OWNER_ID = 533370022295502879
 
 async def validate_access(context, user):
     """Checks if user has permission to use command."""
-    if discord.utils.find(lambda r: r.id in [MOD_ROLE_ID, GUILD_OWNER_ID], user.roles):
-        return True
-    return False
+    return discord.utils.find(lambda r: r.id in [MOD_ROLE_ID, GUILD_OWNER_ID], user.roles)
 
 class Admin(commands.Cog):
     """Commands usable only by the admin."""
@@ -91,7 +89,7 @@ class Admin(commands.Cog):
         def check(reaction, user):
             return reaction.message.id == report.id and user == context.message.author and str(reaction.emoji) == "📧"
 
-        if not validate_access(context, context.message.author):
+        if not await validate_access(context, context.message.author):
             return
 
         inactive_members = await self.get_inactive_members(context)
@@ -109,7 +107,7 @@ class Admin(commands.Cog):
     
     @commands.command(description="Notifies all purgelist members on their inactivity.")
     async def purgenotify(self, context):
-        if not validate_access(context, context.message.author):
+        if not await validate_access(context, context.message.author):
             return
 
         mod_role = discord.utils.find(lambda r: r.id == MOD_ROLE_ID, context.guild.roles)
@@ -142,7 +140,7 @@ class Admin(commands.Cog):
             except asyncio.TimeoutError:
                 return False
 
-        if not validate_access(context, context.message.author):
+        if not await validate_access(context, context.message.author):
             return
 
         arguments = context.message.content.split(maxsplit=2)
