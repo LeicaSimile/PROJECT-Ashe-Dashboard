@@ -162,16 +162,16 @@ class Admin(commands.Cog):
             await context.channel.send("I couldn't find that channel on this server.")
             return
 
+        destination = discord.utils.find(lambda c: c.id == destination_id, context.guild.text_channels)
+        if not destination:
+            await context.channel.send("I couldn't find that channel on this server.")
+
         try:
             msg = arguments[2]
         except IndexError:
             msg = await get_message(context)
             if not msg:
                 return
-        
-        destination = discord.utils.find(lambda c: c.id == destination_id, context.guild.text_channels)
-        if not destination:
-            await context.channel.send("I couldn't find that channel on this server.")
         
         sent = await destination.send(msg)
         await context.channel.send(f"Message sent: {sent.jump_url}")
