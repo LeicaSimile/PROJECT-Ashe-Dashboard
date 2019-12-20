@@ -137,7 +137,8 @@ class Admin(commands.Cog):
 
             await context.channel.send("What's your message?")
             try:
-                return await self.bot.client.wait_for("message", timeout=60, check=check_message)
+                message = await self.bot.client.wait_for("message", timeout=60, check=check_message)
+                return message.content
             except asyncio.TimeoutError:
                 return False
 
