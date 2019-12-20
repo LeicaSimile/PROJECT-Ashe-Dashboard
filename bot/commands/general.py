@@ -147,11 +147,13 @@ class Admin(commands.Cog):
         msg = ""
 
         try:
-            destination_id = arguments[1]
+            destination_id = int(arguments[1].strip("<># "))
         except IndexError:
             destination_id = await get_destination(context)
             if not destination_id:
                 return
+        except ValueError:
+            await context.channel.send("I couldn't find that channel on this server.")
 
         try:
             msg = arguments[2]
@@ -162,7 +164,7 @@ class Admin(commands.Cog):
         
         destination = discord.utils.find(lambda c: c.id == destination_id, context.guild.text_channels)
         if not destination:
-            await context.channel.send(f"I couldn't find that channel on this server.")
+            await context.channel.send("I couldn't find that channel on this server.")
         
         await destination.send(msg)
 
