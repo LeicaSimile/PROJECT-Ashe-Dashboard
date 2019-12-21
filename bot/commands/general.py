@@ -193,6 +193,7 @@ class Admin(commands.Cog):
             await context.channel.send("Enter the message ID to be edited:")
             try:
                 message_id = await self.bot.client.wait_for("message", timeout=30, check=check_id)
+                message_id = message_id.content
             except asyncio.TimeoutError:
                 await context.channel.send("Time's up.")
                 return
