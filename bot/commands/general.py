@@ -176,6 +176,9 @@ class Admin(commands.Cog):
 
     @commands.command(description="Edit a message sent through me.")
     async def edit(self, context):
+        def check_id(msg):
+            return msg.author.id == context.message.author.id and msg.channel.id == context.channel.id
+
         def check_message(msg):
             return msg.author.id == context.message.author.id and msg.channel.id == context.channel.id
 
