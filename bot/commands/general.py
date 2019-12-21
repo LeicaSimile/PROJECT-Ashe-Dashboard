@@ -203,7 +203,7 @@ class Admin(commands.Cog):
             await context.channel.send(f"{message_id} is not a valid message ID.")
             return
 
-        to_edit = await context.guild.me.fetch_message(message_id)
+        to_edit = await context.channel.fetch_message(message_id)
         if not to_edit:
             await context.channel.send(f"Couldn't find message with ID #{message_id}.")
         elif to_edit.author.id != context.guild.me.id:
