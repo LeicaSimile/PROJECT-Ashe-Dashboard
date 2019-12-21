@@ -179,7 +179,7 @@ class Admin(commands.Cog):
         if not await validate_access(context, context.message.author):
             return
 
-        arguments = context.message.context.split()
+        arguments = context.message.content.split()
         message_id = 0
         try:
             message_id = arguments[1]
