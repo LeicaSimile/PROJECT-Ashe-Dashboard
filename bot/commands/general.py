@@ -176,6 +176,9 @@ class Admin(commands.Cog):
 
     @commands.command(description="Edit a message sent through me.")
     async def edit(self, context):
+        def check_message(msg):
+            return msg.author.id == context.message.author.id and msg.channel.id == context.channel.id
+
         if not await validate_access(context, context.message.author):
             return
 
@@ -184,7 +187,12 @@ class Admin(commands.Cog):
         try:
             message_id = arguments[1]
         except IndexError:
-            pass
+            await context.channel.send("Enter the message ID to be edited:")
+            try:
+                message_id = await self.bot.client.wait_for("message", timeout=30, check=check_id)
+            except asyncio.TimeoutError:
+                await context.channel.send("Time's up.")
+                return
         try:
             message_id = int(message_id)
         except ValueError:
@@ -205,7 +213,7 @@ class Admin(commands.Cog):
             )
             await context.channel.send(content="Enter the newly edited message below.", embed=preview)
             try:
-                new_edit = await self.bot.client.wait_for("message", timeout=60, check=check)
+                new_edit = await self.bot.client.wait_for("message", timeout=60, check=check_message)
             except asyncio.TimeoutError:
                 await context.channel.send("Time's up.")
             else:
