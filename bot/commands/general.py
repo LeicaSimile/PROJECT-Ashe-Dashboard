@@ -174,6 +174,48 @@ class Admin(commands.Cog):
         sent = await destination.send(msg)
         await context.channel.send(f"Message sent: {sent.jump_url}")
 
+    @commands.command(description="Edit a message sent through me.")
+    async def edit(self, context):
+        if not await validate_access(context, context.message.author):
+            return
+
+        arguments = context.message.context.split()
+        message_id = 0
+        try:
+            message_id = arguments[1]
+        except IndexError:
+            pass
+        try:
+            message_id = int(message_id)
+        except ValueError:
+            await context.channel.send(f"{message_id} is not a valid message ID.")
+            return
+
+        to_edit = await context.guild.me.fetch_message(message_id)
+        if not to_edit:
+            await context.channel.send(f"Couldn't find message with ID #{message_id}.")
+        elif to_edit.author.id != context.guild.me.id:
+            await context.channel.send("I can only edit messages I sent.")
+        else:
+            preview = discord.Embed(
+                title="Message to Edit",
+                url=to_edit.jump_url,
+                description=to_edit.content,
+                timestamp=to_edit.edited_at if to_edit.edited_at else to_edit.created_at
+            )
+            await context.channel.send(content="Enter the newly edited message below.", embed=preview)
+            try:
+                new_edit = await self.bot.client.wait_for("message", timeout=60, check=check)
+            except asyncio.TimeoutError:
+                await context.channel.send("Time's up.")
+            else:
+                try:
+                    to_edit.edit(content=new_edit.content)
+                except discord.Forbidden:
+                    await context.channel.send("I'm not allowed to edit this message.")
+                else:
+                    await context.channel.send(f"Message edited: {to_edit.jump_url}")
+
     @commands.command(description="Shut me down :c")
     async def shutdown(self, context):
         async def log_out(context):
