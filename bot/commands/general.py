@@ -222,7 +222,7 @@ class Admin(commands.Cog):
                 await context.channel.send("Time's up.")
             else:
                 try:
-                    to_edit.edit(content=new_edit.content)
+                    await to_edit.edit(content=new_edit.content)
                 except discord.Forbidden:
                     await context.channel.send("I'm not allowed to edit this message.")
                 else:
