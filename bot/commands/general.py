@@ -171,8 +171,12 @@ class Admin(commands.Cog):
             if not msg:
                 return
         
-        sent = await destination.send(msg)
-        await context.channel.send(f"Message sent: {sent.jump_url}")
+        try:
+            sent = await destination.send(msg)
+        except discord.Forbidden:
+            await context.channel.send(f"I don't have permission to send messages to {destination.name}")
+        else:
+            await context.channel.send(f"Message sent: {sent.jump_url}")
 
     @commands.command(
         description="Edit a message sent through me.",
