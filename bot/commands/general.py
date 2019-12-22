@@ -229,7 +229,7 @@ class Admin(commands.Cog):
             preview = discord.Embed(
                 title="Current Message",
                 url=to_edit.jump_url,
-                description=f"```{to_edit.content}```",
+                description=discord.utils.escape_markdown(to_edit.content),
                 timestamp=to_edit.edited_at if to_edit.edited_at else to_edit.created_at
             )
             await context.channel.send(content="Enter the newly edited message below.", embed=preview)
