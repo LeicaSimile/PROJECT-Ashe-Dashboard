@@ -180,7 +180,7 @@ class Admin(commands.Cog):
 
     @commands.command(
         description="Edit a message sent through me.",
-        usage="[message ID]",
+        usage="#[channel name]",
         help="""To get the message ID, enable developer mode in App Settings > Appearance > Advanced > Developer Mode.
         
         (PC) Hover to the right of the message and click the three vertical dots > Copy ID.
@@ -200,23 +200,26 @@ class Admin(commands.Cog):
 
         arguments = context.message.content.split()
         message_id = 0
+        if not context.message.channel_mentions:
+            await context.channel.send(";edit #[channel name]")
+            return
+        channel = context.message.channel_mentions[0]
+
+        await context.channel.send("Enter the message ID to be edited:")
         try:
-            message_id = arguments[1]
-        except IndexError:
-            await context.channel.send("Enter the message ID to be edited:")
-            try:
-                message_id = await self.bot.client.wait_for("message", timeout=30, check=check_id)
-                message_id = message_id.content
-            except asyncio.TimeoutError:
-                await context.channel.send("Time's up.")
-                return
+            message_id = await self.bot.client.wait_for("message", timeout=30, check=check_id)
+            message_id = message_id.content
+        except asyncio.TimeoutError:
+            await context.channel.send("Time's up.")
+            return
+
         try:
             message_id = int(message_id)
         except ValueError:
             await context.channel.send(f"{message_id} is not a valid message ID.")
             return
 
-        to_edit = await context.channel.fetch_message(message_id)
+        to_edit = await channel.fetch_message(message_id)
         if not to_edit:
             await context.channel.send(f"Couldn't find message with ID #{message_id}.")
         elif to_edit.author.id != context.guild.me.id:
