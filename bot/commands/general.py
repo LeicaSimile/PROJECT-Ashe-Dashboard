@@ -226,7 +226,7 @@ class Admin(commands.Cog):
             await context.channel.send("I can only edit messages I sent.")
         else:
             preview = discord.Embed(
-                title="Message to Edit",
+                title="Current Message",
                 url=to_edit.jump_url,
                 description=f"```{to_edit.content}```",
                 timestamp=to_edit.edited_at if to_edit.edited_at else to_edit.created_at
