@@ -174,7 +174,16 @@ class Admin(commands.Cog):
         sent = await destination.send(msg)
         await context.channel.send(f"Message sent: {sent.jump_url}")
 
-    @commands.command(description="Edit a message sent through me.")
+    @commands.command(
+        description="Edit a message sent through me.",
+        usage="[message ID]",
+        help="""To get the message ID, enable developer mode in App Settings > Appearance > Advanced > Developer Mode.
+        
+        (PC) Hover to the right of the message and click the three vertical dots > Copy ID.
+        (Mobile) Tap and hold the message > Copy ID.
+        
+        Paste the message ID when prompted, then enter the new message."""
+    )
     async def edit(self, context):
         def check_id(msg):
             return msg.author.id == context.message.author.id and msg.channel.id == context.channel.id
