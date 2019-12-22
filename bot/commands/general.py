@@ -228,10 +228,9 @@ class Admin(commands.Cog):
             preview = discord.Embed(
                 title="Message to Edit",
                 url=to_edit.jump_url,
-                description=to_edit.content,
+                description=f"```{to_edit.content}```",
                 timestamp=to_edit.edited_at if to_edit.edited_at else to_edit.created_at
             )
-            preview.add_field(name="Raw Text", value=f"```{to_edit.content}```")
             await context.channel.send(content="Enter the newly edited message below.", embed=preview)
             try:
                 new_edit = await self.bot.client.wait_for("message", timeout=60, check=check_message)
