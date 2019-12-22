@@ -27,15 +27,22 @@ def setup():
         );
 
         CREATE TABLE IF NOT EXISTS Permission (
-            permission_id PRIMARY KEY,
+            permission_id SMALLINT PRIMARY KEY,
             permission_name VARCHAR(32)
         );
 
-        CREATE TABLE IF NOT EXISTS Guild_Permission (
-            guild_permission_id SERIAL PRIMARY KEY,
+        CREATE TABLE IF NOT EXISTS Guild_Role_Permission (
+            role_permission_id SERIAL PRIMARY KEY,
             guild_id INTEGER NOT NULL,
             role_id INTEGER NOT NULL,
-            permissions SMALLINT NOT NULL
+            permission_level SMALLINT NOT NULL
+        );
+
+        CREATE TABLE IF NOT EXISTS Guild_Member_Permission (
+            member_permission_id SERIAL PRIMARY KEY,
+            guild_id INTEGER NOT NULL,
+            member_id INTEGER NOT NULL,
+            permission_level SMALLINT NOT NULL
         );
         """
 
