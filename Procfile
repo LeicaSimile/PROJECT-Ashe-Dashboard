@@ -1,2 +1,2 @@
-worker: python bot/src/main.py
+worker: python bot/start.py
 web: npm start

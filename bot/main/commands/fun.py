@@ -1,11 +1,13 @@
 import datetime
 import io
 import os
+
 import discord
 from discord.ext import commands
 from wordcloud import WordCloud
 from matplotlib.image import imread
-from status import CommandStatus
+
+from main.status import CommandStatus
 
 class Fun(commands.Cog):
     """Commands for fun."""

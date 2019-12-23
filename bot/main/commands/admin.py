@@ -5,14 +5,42 @@ import re
 
 import discord
 from discord.ext import commands
-import settings
-from status import CommandStatus
+
+from main import settings
+from main.status import CommandStatus
 
 URL_REGEX = r"""(?i)\b((?:https?:(?:/{1,3}|[a-z0-9%])|[a-z0-9.\-]+[.](?:com|net|org|edu|gov|mil|aero|asia|biz|cat|coop|info|int|jobs|mobi|museum|name|post|pro|tel|travel|xxx|ac|ad|ae|af|ag|ai|al|am|an|ao|aq|ar|as|at|au|aw|ax|az|ba|bb|bd|be|bf|bg|bh|bi|bj|bm|bn|bo|br|bs|bt|bv|bw|by|bz|ca|cc|cd|cf|cg|ch|ci|ck|cl|cm|cn|co|cr|cs|cu|cv|cx|cy|cz|dd|de|dj|dk|dm|do|dz|ec|ee|eg|eh|er|es|et|eu|fi|fj|fk|fm|fo|fr|ga|gb|gd|ge|gf|gg|gh|gi|gl|gm|gn|gp|gq|gr|gs|gt|gu|gw|gy|hk|hm|hn|hr|ht|hu|id|ie|il|im|in|io|iq|ir|is|it|je|jm|jo|jp|ke|kg|kh|ki|km|kn|kp|kr|kw|ky|kz|la|lb|lc|li|lk|lr|ls|lt|lu|lv|ly|ma|mc|md|me|mg|mh|mk|ml|mm|mn|mo|mp|mq|mr|ms|mt|mu|mv|mw|mx|my|mz|na|nc|ne|nf|ng|ni|nl|no|np|nr|nu|nz|om|pa|pe|pf|pg|ph|pk|pl|pm|pn|pr|ps|pt|pw|py|qa|re|ro|rs|ru|rw|sa|sb|sc|sd|se|sg|sh|si|sj|Ja|sk|sl|sm|sn|so|sr|ss|st|su|sv|sx|sy|sz|tc|td|tf|tg|th|tj|tk|tl|tm|tn|to|tp|tr|tt|tv|tw|tz|ua|ug|uk|us|uy|uz|va|vc|ve|vg|vi|vn|vu|wf|ws|ye|yt|yu|za|zm|zw)/)(?:[^\s()<>{}\[\]]+|\([^\s()]*?\([^\s()]+\)[^\s()]*?\)|\([^\s]+?\))+(?:\([^\s()]*?\([^\s()]+\)[^\s()]*?\)|\([^\s]+?\)|[^\s`!()\[\]{};:\'\".,<>?«»“”‘’])|(?:(?<!@)[a-z0-9]+(?:[.\-][a-z0-9]+)*[.](?:com|net|org|edu|gov|mil|aero|asia|biz|cat|coop|info|int|jobs|mobi|museum|name|post|pro|tel|travel|xxx|ac|ad|ae|af|ag|ai|al|am|an|ao|aq|ar|as|at|au|aw|ax|az|ba|bb|bd|be|bf|bg|bh|bi|bj|bm|bn|bo|br|bs|bt|bv|bw|by|bz|ca|cc|cd|cf|cg|ch|ci|ck|cl|cm|cn|co|cr|cs|cu|cv|cx|cy|cz|dd|de|dj|dk|dm|do|dz|ec|ee|eg|eh|er|es|et|eu|fi|fj|fk|fm|fo|fr|ga|gb|gd|ge|gf|gg|gh|gi|gl|gm|gn|gp|gq|gr|gs|gt|gu|gw|gy|hk|hm|hn|hr|ht|hu|id|ie|il|im|in|io|iq|ir|is|it|je|jm|jo|jp|ke|kg|kh|ki|km|kn|kp|kr|kw|ky|kz|la|lb|lc|li|lk|lr|ls|lt|lu|lv|ly|ma|mc|md|me|mg|mh|mk|ml|mm|mn|mo|mp|mq|mr|ms|mt|mu|mv|mw|mx|my|mz|na|nc|ne|nf|ng|ni|nl|no|np|nr|nu|nz|om|pa|pe|pf|pg|ph|pk|pl|pm|pn|pr|ps|pt|pw|py|qa|re|ro|rs|ru|rw|sa|sb|sc|sd|se|sg|sh|si|sj|Ja|sk|sl|sm|sn|so|sr|ss|st|su|sv|sx|sy|sz|tc|td|tf|tg|th|tj|tk|tl|tm|tn|to|tp|tr|tt|tv|tw|tz|ua|ug|uk|us|uy|uz|va|vc|ve|vg|vi|vn|vu|wf|ws|ye|yt|yu|za|zm|zw)\b/?(?!@)))"""
 
 async def validate_access(context, user):
     """Checks if user has permission to use command."""
     return discord.utils.find(lambda r: r.id in [settings.MOD_ROLE_ID, settings.GUILD_OWNER_ID], user.roles)
+
+async def get_inactive_members(context, progress_report=True):
+    """Returns a list of inactive members."""
+    senders = []
+    now = datetime.datetime.now()
+    channel_count = len(context.guild.text_channels)
+    progress_msg = None
+
+    if progress_report:
+        progress_msg = await context.channel.send(f"Scanning {channel_count} channels for inactive members.")
+    
+    for i, channel in enumerate(context.guild.text_channels):
+        try:
+            async for m in channel.history(limit=None, after=(now - datetime.timedelta(days=14)), oldest_first=False):
+                if m.author not in senders:
+                    senders.append(m.author)
+        except discord.errors.Forbidden:
+            print(f"Can't access {channel.name}")
+        else:
+            if progress_msg:
+                await progress_msg.edit(content=f"Scanned {i}/{channel_count} channels for inactive members.")
+    
+    if progress_msg:
+        await progress_msg.edit(content=f"Scanned {channel_count} channels for inactive members.")
+
+    return [u for u in context.guild.members if u not in senders]
+
 
 class Admin(commands.Cog):
     """Commands usable only by the admin."""
@@ -24,32 +52,6 @@ class Admin(commands.Cog):
             
         """
         self.bot = bot
-
-    async def get_inactive_members(self, context, progress_report=True):
-        """Returns a list of inactive members."""
-        senders = []
-        now = datetime.datetime.now()
-        channel_count = len(context.guild.text_channels)
-        progress_msg = None
-
-        if progress_report:
-            progress_msg = await context.channel.send(f"Scanning {channel_count} channels for inactive members.")
-        
-        for i, channel in enumerate(context.guild.text_channels):
-            try:
-                async for m in channel.history(limit=None, after=(now - datetime.timedelta(days=14)), oldest_first=False):
-                    if m.author not in senders:
-                        senders.append(m.author)
-            except discord.errors.Forbidden:
-                print(f"Can't access {channel.name}")
-            else:
-                if progress_msg:
-                    await progress_msg.edit(content=f"Scanned {i}/{channel_count} channels for inactive members.")
-        
-        if progress_msg:
-            await progress_msg.edit(content=f"Scanned {channel_count} channels for inactive members.")
-
-        return [u for u in context.guild.members if u not in senders]
 
     async def notify_members(self, context, members, message):
         for member in members:
@@ -91,7 +93,7 @@ class Admin(commands.Cog):
         if not await validate_access(context, context.message.author):
             return CommandStatus.INVALID
 
-        inactive_members = await self.get_inactive_members(context)
+        inactive_members = await get_inactive_members(context)
         inactive_list = "\n".join([f"{u.display_name} ({u.name}#{u.discriminator})" for u in inactive_members])
         report = await context.channel.send(f"{context.author.mention} Inactive members (2+ weeks since last message): ```{inactive_list}```\nReact below to notify them.")
         await report.add_reaction("📧")
@@ -112,7 +114,7 @@ class Admin(commands.Cog):
             return CommandStatus.INVALID
 
         mod_role = discord.utils.find(lambda r: r.id == settings.MOD_ROLE_ID, context.guild.roles)
-        to_notify = await self.get_inactive_members(context)
+        to_notify = await get_inactive_members(context)
         message = f"Hello, we noticed you haven't been active for a while at ***{context.guild.name}***.\n\nWe have a policy of **kicking inactive members**, but if you're taking a break, that's alright. **Just let a moderator *({mod_role.name})* know** and we'll make sure to exempt you.\n\n(Do not reply here. This is an automated message and any replies will be ignored)"
 
         await self.notify_members(context, to_notify, message)

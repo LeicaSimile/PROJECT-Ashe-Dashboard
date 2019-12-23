@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 import logging
-from bot import Bot
+from main.bot import Bot
 
 logger = logging.getLogger("main")
 

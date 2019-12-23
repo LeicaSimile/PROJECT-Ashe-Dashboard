@@ -1,5 +1,5 @@
 import psycopg2
-import settings
+from main import settings
 
 def setup():
     try:

@@ -14,6 +14,9 @@ from typing import Any, Iterable, Optional
 import discord
 from discord.ext.commands import Context
 
+from main.bot import Bot
+
+
 def async_test(wrapped):
     """
     Run a test case via asyncio.
@@ -180,6 +183,33 @@ class AsyncIteratorMock:
         self.call_count = 0
 
 
+# Create a guild instance to get a realistic Mock of `discord.Guild`
+guild_data = {
+    'id': 1,
+    'name': 'guild',
+    'region': 'Europe',
+    'verification_level': 2,
+    'default_notications': 1,
+    'afk_timeout': 100,
+    'icon': "icon.png",
+    'banner': 'banner.png',
+    'mfa_level': 1,
+    'splash': 'splash.png',
+    'system_channel_id': 464033278631084042,
+    'description': 'mocking is fun',
+    'max_presences': 10_000,
+    'max_members': 100_000,
+    'preferred_locale': 'UTC',
+    'owner_id': 1,
+    'afk_channel_id': 464033278631084042,
+}
+guild_instance = discord.Guild(data=guild_data, state=unittest.mock.MagicMock())
+
+# Create a Role instance to get a realistic Mock of `discord.Role`
+role_data = {'name': 'role', 'id': 1}
+role_instance = discord.Role(guild=guild_instance, state=unittest.mock.MagicMock(), data=role_data)
+
+
 class MockRole(CustomMockMixin, unittest.mock.Mock, ColourMixin, HashableMixin):
     """
     A Mock subclass to mock `discord.Role` objects.
@@ -227,6 +257,12 @@ class MockGuild(CustomMockMixin, unittest.mock.Mock, HashableMixin):
             self.roles.extend(roles)
 
 
+# Create a Member instance to get a realistic Mock of `discord.Member`
+member_data = {'user': 'lemon', 'roles': [1]}
+state_mock = unittest.mock.MagicMock()
+member_instance = discord.Member(data=member_data, guild=guild_instance, state=state_mock)
+
+
 class MockMember(CustomMockMixin, unittest.mock.Mock, ColourMixin, HashableMixin):
     """
     A Mock subclass to mock Member objects.
@@ -245,6 +281,10 @@ class MockMember(CustomMockMixin, unittest.mock.Mock, ColourMixin, HashableMixin
             self.mention = f"@{self.name}"
 
 
+# Create a User instance to get a realistic Mock of `discord.User`
+user_instance = discord.User(data=unittest.mock.MagicMock(), state=unittest.mock.MagicMock())
+
+
 class MockUser(CustomMockMixin, unittest.mock.Mock, ColourMixin, HashableMixin):
     """
     A Mock subclass to mock User objects.
@@ -257,6 +297,12 @@ class MockUser(CustomMockMixin, unittest.mock.Mock, ColourMixin, HashableMixin):
 
         if 'mention' not in kwargs:
             self.mention = f"@{self.name}"
+
+
+# Create a Bot instance to get a realistic MagicMock of `discord.ext.commands.Bot`
+bot_instance = Bot(command_prefix=unittest.mock.MagicMock())
+bot_instance.http_session = None
+bot_instance.api_client = None
 
 
 class MockBot(CustomMockMixin, unittest.mock.MagicMock):
@@ -280,6 +326,22 @@ class MockBot(CustomMockMixin, unittest.mock.MagicMock):
         self.loop.create_task.side_effect = lambda coroutine: coroutine.close()
 
 
+# Create a TextChannel instance to get a realistic MagicMock of `discord.TextChannel`
+channel_data = {
+    'id': 1,
+    'type': 'TextChannel',
+    'name': 'channel',
+    'parent_id': 1234567890,
+    'topic': 'topic',
+    'position': 1,
+    'nsfw': False,
+    'last_message_id': 1,
+}
+state = unittest.mock.MagicMock()
+guild = unittest.mock.MagicMock()
+channel_instance = discord.TextChannel(state=state, guild=guild, data=channel_data)
+
+
 class MockTextChannel(CustomMockMixin, unittest.mock.Mock, HashableMixin):
     """
     A MagicMock subclass to mock TextChannel objects.
@@ -295,6 +357,32 @@ class MockTextChannel(CustomMockMixin, unittest.mock.Mock, HashableMixin):
             self.mention = f"#{self.name}"
 
 
+# Create a Message instance to get a realistic MagicMock of `discord.Message`
+message_data = {
+    'id': 1,
+    'webhook_id': 431341013479718912,
+    'attachments': [],
+    'embeds': [],
+    'application': 'Python Discord',
+    'activity': 'mocking',
+    'channel': unittest.mock.MagicMock(),
+    'edited_timestamp': '2019-10-14T15:33:48+00:00',
+    'type': 'message',
+    'pinned': False,
+    'mention_everyone': False,
+    'tts': None,
+    'content': 'content',
+    'nonce': None,
+}
+state = unittest.mock.MagicMock()
+channel = unittest.mock.MagicMock()
+message_instance = discord.Message(state=state, channel=channel, data=message_data)
+
+
+# Create a Context instance to get a realistic MagicMock of `discord.ext.commands.Context`
+context_instance = Context(message=unittest.mock.MagicMock(), prefix=unittest.mock.MagicMock())
+
+
 class MockContext(CustomMockMixin, unittest.mock.MagicMock):
     """
     A MagicMock subclass to mock Context objects.
@@ -308,6 +396,9 @@ class MockContext(CustomMockMixin, unittest.mock.MagicMock):
         self.guild = kwargs.get('guild', MockGuild())
         self.author = kwargs.get('author', MockMember())
         self.channel = kwargs.get('channel', MockTextChannel())
+
+
+attachment_instance = discord.Attachment(data=unittest.mock.MagicMock(id=1), state=unittest.mock.MagicMock())
 
 
 class MockAttachment(CustomMockMixin, unittest.mock.MagicMock):
@@ -334,6 +425,10 @@ class MockMessage(CustomMockMixin, unittest.mock.MagicMock):
         self.channel = kwargs.get('channel', MockTextChannel())
 
 
+emoji_data = {'require_colons': True, 'managed': True, 'id': 1, 'name': 'hyperlemon'}
+emoji_instance = discord.Emoji(guild=MockGuild(), state=unittest.mock.MagicMock(), data=emoji_data)
+
+
 class MockEmoji(CustomMockMixin, unittest.mock.MagicMock):
     """
     A MagicMock subclass to mock Emoji objects.
@@ -346,6 +441,9 @@ class MockEmoji(CustomMockMixin, unittest.mock.MagicMock):
         self.guild = kwargs.get('guild', MockGuild())
 
 
+partial_emoji_instance = discord.PartialEmoji(animated=False, name='guido')
+
+
 class MockPartialEmoji(CustomMockMixin, unittest.mock.MagicMock):
     """
     A MagicMock subclass to mock PartialEmoji objects.
@@ -355,6 +453,9 @@ class MockPartialEmoji(CustomMockMixin, unittest.mock.MagicMock):
 
     def __init__(self, **kwargs) -> None:
         super().__init__(spec_set=partial_emoji_instance, **kwargs)
+
+
+reaction_instance = discord.Reaction(message=MockMessage(), data={'me': True}, emoji=MockEmoji())
 
 
 class MockReaction(CustomMockMixin, unittest.mock.MagicMock):
@@ -369,21 +470,3 @@ class MockReaction(CustomMockMixin, unittest.mock.MagicMock):
         self.emoji = kwargs.get('emoji', MockEmoji())
         self.message = kwargs.get('message', MockMessage())
         self.users = AsyncIteratorMock(kwargs.get('users', []))
-
-
-class MockAsyncWebhook(CustomMockMixin, unittest.mock.MagicMock):
-    """
-    A MagicMock subclass to mock Webhook objects using an AsyncWebhookAdapter.
-    Instances of this class will follow the specifications of `discord.Webhook` instances. For
-    more information, see the `MockGuild` docstring.
-    """
-
-    def __init__(self, **kwargs) -> None:
-        super().__init__(spec_set=webhook_instance, **kwargs)
-
-        # Because Webhooks can also use a synchronous "WebhookAdapter", the methods are not defined
-        # as coroutines. That's why we need to set the methods manually.
-        self.send = AsyncMock()
-        self.edit = AsyncMock()
-        self.delete = AsyncMock()
-        self.execute = AsyncMock()

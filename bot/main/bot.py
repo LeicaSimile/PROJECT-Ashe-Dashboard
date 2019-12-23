@@ -2,10 +2,12 @@
 import logging
 import re
 import discord
-import commands
-import settings
+
 import psycopg2
 from imgurpython import ImgurClient
+
+from main import commands
+from main import settings
 
 class Bot(object):
     """
