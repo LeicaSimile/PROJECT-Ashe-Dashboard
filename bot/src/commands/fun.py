@@ -1,11 +1,11 @@
 import datetime
 import io
 import os
-
 import discord
 from discord.ext import commands
 from wordcloud import WordCloud
 from matplotlib.image import imread
+from status import CommandStatus
 
 class Fun(commands.Cog):
     """Commands for fun."""
@@ -67,4 +67,4 @@ class Fun(commands.Cog):
 
         await report.delete()
         await context.channel.send(f"A wordcloud for {subject}'s past {days} days:", file=discord.File(wc_filepath))
-        
+        return CommandStatus.COMPLETED

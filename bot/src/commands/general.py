@@ -6,6 +6,7 @@ import re
 import discord
 from discord.ext import commands
 import settings
+from status import CommandStatus
 
 URL_REGEX = r"""(?i)\b((?:https?:(?:/{1,3}|[a-z0-9%])|[a-z0-9.\-]+[.](?:com|net|org|edu|gov|mil|aero|asia|biz|cat|coop|info|int|jobs|mobi|museum|name|post|pro|tel|travel|xxx|ac|ad|ae|af|ag|ai|al|am|an|ao|aq|ar|as|at|au|aw|ax|az|ba|bb|bd|be|bf|bg|bh|bi|bj|bm|bn|bo|br|bs|bt|bv|bw|by|bz|ca|cc|cd|cf|cg|ch|ci|ck|cl|cm|cn|co|cr|cs|cu|cv|cx|cy|cz|dd|de|dj|dk|dm|do|dz|ec|ee|eg|eh|er|es|et|eu|fi|fj|fk|fm|fo|fr|ga|gb|gd|ge|gf|gg|gh|gi|gl|gm|gn|gp|gq|gr|gs|gt|gu|gw|gy|hk|hm|hn|hr|ht|hu|id|ie|il|im|in|io|iq|ir|is|it|je|jm|jo|jp|ke|kg|kh|ki|km|kn|kp|kr|kw|ky|kz|la|lb|lc|li|lk|lr|ls|lt|lu|lv|ly|ma|mc|md|me|mg|mh|mk|ml|mm|mn|mo|mp|mq|mr|ms|mt|mu|mv|mw|mx|my|mz|na|nc|ne|nf|ng|ni|nl|no|np|nr|nu|nz|om|pa|pe|pf|pg|ph|pk|pl|pm|pn|pr|ps|pt|pw|py|qa|re|ro|rs|ru|rw|sa|sb|sc|sd|se|sg|sh|si|sj|Ja|sk|sl|sm|sn|so|sr|ss|st|su|sv|sx|sy|sz|tc|td|tf|tg|th|tj|tk|tl|tm|tn|to|tp|tr|tt|tv|tw|tz|ua|ug|uk|us|uy|uz|va|vc|ve|vg|vi|vn|vu|wf|ws|ye|yt|yu|za|zm|zw)/)(?:[^\s()<>{}\[\]]+|\([^\s()]*?\([^\s()]+\)[^\s()]*?\)|\([^\s]+?\))+(?:\([^\s()]*?\([^\s()]+\)[^\s()]*?\)|\([^\s]+?\)|[^\s`!()\[\]{};:\'\".,<>?«»“”‘’])|(?:(?<!@)[a-z0-9]+(?:[.\-][a-z0-9]+)*[.](?:com|net|org|edu|gov|mil|aero|asia|biz|cat|coop|info|int|jobs|mobi|museum|name|post|pro|tel|travel|xxx|ac|ad|ae|af|ag|ai|al|am|an|ao|aq|ar|as|at|au|aw|ax|az|ba|bb|bd|be|bf|bg|bh|bi|bj|bm|bn|bo|br|bs|bt|bv|bw|by|bz|ca|cc|cd|cf|cg|ch|ci|ck|cl|cm|cn|co|cr|cs|cu|cv|cx|cy|cz|dd|de|dj|dk|dm|do|dz|ec|ee|eg|eh|er|es|et|eu|fi|fj|fk|fm|fo|fr|ga|gb|gd|ge|gf|gg|gh|gi|gl|gm|gn|gp|gq|gr|gs|gt|gu|gw|gy|hk|hm|hn|hr|ht|hu|id|ie|il|im|in|io|iq|ir|is|it|je|jm|jo|jp|ke|kg|kh|ki|km|kn|kp|kr|kw|ky|kz|la|lb|lc|li|lk|lr|ls|lt|lu|lv|ly|ma|mc|md|me|mg|mh|mk|ml|mm|mn|mo|mp|mq|mr|ms|mt|mu|mv|mw|mx|my|mz|na|nc|ne|nf|ng|ni|nl|no|np|nr|nu|nz|om|pa|pe|pf|pg|ph|pk|pl|pm|pn|pr|ps|pt|pw|py|qa|re|ro|rs|ru|rw|sa|sb|sc|sd|se|sg|sh|si|sj|Ja|sk|sl|sm|sn|so|sr|ss|st|su|sv|sx|sy|sz|tc|td|tf|tg|th|tj|tk|tl|tm|tn|to|tp|tr|tt|tv|tw|tz|ua|ug|uk|us|uy|uz|va|vc|ve|vg|vi|vn|vu|wf|ws|ye|yt|yu|za|zm|zw)\b/?(?!@)))"""
 
@@ -88,7 +89,7 @@ class Admin(commands.Cog):
             return reaction.message.id == report.id and user == context.message.author and str(reaction.emoji) == "📧"
 
         if not await validate_access(context, context.message.author):
-            return
+            return CommandStatus.INVALID
 
         inactive_members = await self.get_inactive_members(context)
         inactive_list = "\n".join([f"{u.display_name} ({u.name}#{u.discriminator})" for u in inactive_members])
@@ -102,17 +103,20 @@ class Admin(commands.Cog):
             await report.clear_reactions()
         else:
             await context.channel.send(f"k")
+        
+        return CommandStatus.COMPLETED
     
     @commands.command(description="Notifies all purgelist members on their inactivity.")
     async def purgenotify(self, context):
         if not await validate_access(context, context.message.author):
-            return
+            return CommandStatus.INVALID
 
         mod_role = discord.utils.find(lambda r: r.id == settings.MOD_ROLE_ID, context.guild.roles)
         to_notify = await self.get_inactive_members(context)
         message = f"Hello, we noticed you haven't been active for a while at ***{context.guild.name}***.\n\nWe have a policy of **kicking inactive members**, but if you're taking a break, that's alright. **Just let a moderator *({mod_role.name})* know** and we'll make sure to exempt you.\n\n(Do not reply here. This is an automated message and any replies will be ignored)"
 
         await self.notify_members(context, to_notify, message)
+        return CommandStatus.COMPLETED
 
     @commands.command(description="Send a message through me.")
     async def message(self, context):
@@ -139,7 +143,7 @@ class Admin(commands.Cog):
                 return False
 
         if not await validate_access(context, context.message.author):
-            return
+            return CommandStatus.INVALID
 
         arguments = context.message.content.split(maxsplit=2)
         destination_id = None
@@ -150,29 +154,26 @@ class Admin(commands.Cog):
         except IndexError:
             destination_id = await get_destination(context)
             if not destination_id:
-                return
+                return CommandStatus.CANCELLED
 
-        try:
-            destination_id = int(destination_id.strip("<># "))
-        except ValueError:
-            await context.channel.send("I couldn't find that channel on this server.")
-            return
-
-        destination = discord.utils.find(lambda c: c.id == destination_id, context.guild.text_channels)
+        destination_id = destination_id.strip("<># ")
+        destination = discord.utils.find(lambda c: str(c.id) == destination_id, context.guild.text_channels)
         if not destination:
             await context.channel.send("I couldn't find that channel on this server.")
+            return CommandStatus.INVALID
 
         try:
             msg = arguments[2]
         except IndexError:
             msg = await get_message(context)
             if not msg:
-                return
+                return CommandStatus.CANCELLED
         
         try:
             sent = await destination.send(msg)
         except discord.Forbidden:
             await context.channel.send(f"I don't have permission to send messages to {destination.name}")
+            return CommandStatus.FORBIDDEN
         else:
             await context.channel.send(f"Message sent: {sent.jump_url}")
 
@@ -201,7 +202,7 @@ class Admin(commands.Cog):
         message_id = 0
         if not context.message.channel_mentions:
             await context.channel.send("To use, put: ```;edit #[channel name]```, where [channel name] is where the message is.")
-            return
+            return CommandStatus.INVALID
         channel = context.message.channel_mentions[0]
 
         await context.channel.send("Enter the message ID to be edited:")
@@ -210,19 +211,21 @@ class Admin(commands.Cog):
             message_id = message_id.content
         except asyncio.TimeoutError:
             await context.channel.send("Time's up.")
-            return
+            return CommandStatus.CANCELLED
 
         try:
             message_id = int(message_id)
         except ValueError:
             await context.channel.send(f"{message_id} is not a valid message ID.")
-            return
+            return CommandStatus.INVALID
 
         to_edit = await channel.fetch_message(message_id)
         if not to_edit:
             await context.channel.send(f"Couldn't find message with ID #{message_id}.")
+            return CommandStatus.INVALID
         elif to_edit.author.id != context.guild.me.id:
             await context.channel.send("I can only edit messages I sent.")
+            return CommandStatus.INVALID
         else:
             preview = discord.Embed(
                 title="Current Message",
@@ -235,13 +238,17 @@ class Admin(commands.Cog):
                 new_edit = await self.bot.client.wait_for("message", timeout=60, check=check_message)
             except asyncio.TimeoutError:
                 await context.channel.send("Time's up.")
+                return CommandStatus.CANCELLED
             else:
                 try:
                     await to_edit.edit(content=new_edit.content)
                 except discord.Forbidden:
                     await context.channel.send("I'm not allowed to edit this message.")
+                    return CommandStatus.FORBIDDEN
                 else:
                     await context.channel.send(f"Message edited: {to_edit.jump_url}")
+
+        return CommandStatus.COMPLETED
 
     @commands.command(description="Shut me down :c")
     async def shutdown(self, context):
@@ -251,10 +258,12 @@ class Admin(commands.Cog):
                 await self.bot.say(context.channel, response, context)
             finally:
                 await self.bot.client.logout()
+                return CommandStatus.COMPLETED
 
         async def sass(context):
             response = "Don't tell me what to do."
             await self.bot.say(context.channel, response)
+            return CommandStatus.INVALID
 
         await self.validate_owner(context, log_out, sass)
 
