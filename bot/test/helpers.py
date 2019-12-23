@@ -4,6 +4,9 @@ See:
 https://github.com/python-discord/bot/blob/master/tests/helpers.py
 """
 import asyncio
+import collections
+import functools
+import inspect
 import itertools
 import unittest.mock
 from typing import Any, Iterable, Optional
