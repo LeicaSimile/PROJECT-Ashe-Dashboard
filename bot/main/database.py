@@ -5,7 +5,7 @@ def setup():
     try:
         conn = psycopg2.connect(settings.DATABASE_URL, sslmode="require")
         cur = conn.cursor()
-        query = """CREATE SCHEMA IF NOT EXISTS core
+        query = """CREATE SCHEMA IF NOT EXISTS core;
         
         CREATE TABLE IF NOT EXISTS core.Default_Config (
             default_config_id SERIAL PRIMARY KEY,
