@@ -5,41 +5,41 @@ def setup():
     try:
         conn = psycopg2.connect(settings.DATABASE_URL, sslmode="require")
         cur = conn.cursor()
-        query = """CREATE SCHEMA IF NOT EXISTS bot
+        query = """CREATE SCHEMA IF NOT EXISTS core
         
-        CREATE TABLE IF NOT EXISTS bot.Default_Config (
+        CREATE TABLE IF NOT EXISTS core.Default_Config (
             default_config_id SERIAL PRIMARY KEY,
             config_key VARCHAR(32) NOT NULL,
             config_value VARCHAR NULL
         );
 
-        CREATE TABLE IF NOT EXISTS bot.Guild_Config (
+        CREATE TABLE IF NOT EXISTS core.Guild_Config (
             guild_config_id SERIAL PRIMARY KEY,
             guild_id INTEGER NOT NULL,
             config_key VARCHAR(32) NOT NULL,
             config_value VARCHAR NULL
         );
 
-        CREATE TABLE IF NOT EXISTS bot.Permission (
+        CREATE TABLE IF NOT EXISTS core.Permission (
             permission_id SMALLINT PRIMARY KEY,
             permission_name VARCHAR(32)
         );
 
-        CREATE TABLE IF NOT EXISTS bot.Guild_Role_Permission (
+        CREATE TABLE IF NOT EXISTS core.Guild_Role_Permission (
             role_permission_id SERIAL PRIMARY KEY,
             guild_id INTEGER NOT NULL,
             role_id INTEGER NOT NULL,
             permission_level SMALLINT NOT NULL
         );
 
-        CREATE TABLE IF NOT EXISTS bot.Guild_Member_Permission (
+        CREATE TABLE IF NOT EXISTS core.Guild_Member_Permission (
             member_permission_id SERIAL PRIMARY KEY,
             guild_id INTEGER NOT NULL,
             member_id INTEGER NOT NULL,
             permission_level SMALLINT NOT NULL
         );
         
-        CREATE TABLE IF NOT EXISTS bot.Inactive_Member (
+        CREATE TABLE IF NOT EXISTS core.Inactive_Member (
             inactive_member_id SERIAL PRIMARY KEY,
             guild_id INTEGER NOT NULL,
             member_id INTEGER NOT NULL,

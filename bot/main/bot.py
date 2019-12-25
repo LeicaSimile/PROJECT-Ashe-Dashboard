@@ -7,6 +7,7 @@ import psycopg2
 from imgurpython import ImgurClient
 
 from main import commands
+from main import database
 from main import settings
 
 class Bot(object):
@@ -24,6 +25,7 @@ class Bot(object):
         self.client = discord.ext.commands.Bot(command_prefix=command_prefix, description=description, **options)
 
     def run(self):
+        database.setup()
         self.set_events()
         self.set_commands()
         self.client.run(settings.CLIENT_TOKEN, reconnect=True)
