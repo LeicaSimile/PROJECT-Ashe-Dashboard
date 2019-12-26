@@ -1,4 +1,5 @@
 import psycopg2
+from psycopg2 import sql
 from main import settings
 
 def setup():
@@ -66,8 +67,30 @@ def update_config_value(key, value):
 def delete_config_record(key):
     return
 
-def get_inactive_members():
+def get_all_inactive_members(guild_id):
+    inactive_members = []
+    try:
+        conn = psycopg2.connect(settings.DATABASE_URL, sslmode="require")
+        cur = conn.cursor()
+        query = sql.SQL(f"""SELECT guild_id, member_id, last_notified, is_exempt
+            FROM core.Inactive_Member WHERE guild_id = ${guild_id}""")
+        cur.execute(query)
+        inactive_members = cur.fetchall()
+    finally:
+        if conn:
+            cur.close()
+            conn.close()
+
+    return inactive_members
+
+def get_inactive_members(guild_id):
     return
 
-def update_inactive_members(guild_id):
+def get_exempt_inactive_members(guild_id):
+    return
+
+def update_inactive_member(guild_id, member_id, **kwargs):
+    return
+
+def add_inactive_member(guild_id, member_id):
     return
