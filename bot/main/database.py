@@ -7,7 +7,7 @@ def setup():
         cur = conn.cursor()
         query = """CREATE SCHEMA IF NOT EXISTS core;
 
-        CREATE TABLE IF NOT EXISTS core.Custom_Status_Type (
+        CREATE TABLE IF NOT EXISTS core.Activity_Type (
             custom_status_type_id SMALLSERIAL PRIMARY KEY,
             status_type VARCHAR(12) NOT NULL
         );
