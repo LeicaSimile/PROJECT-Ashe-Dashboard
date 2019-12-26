@@ -6,17 +6,22 @@ def setup():
         conn = psycopg2.connect(settings.DATABASE_URL, sslmode="require")
         cur = conn.cursor()
         query = """CREATE SCHEMA IF NOT EXISTS core;
+
+        CREATE TABLE IF NOT EXISTS core.Custom_Status_Type (
+            custom_status_type_id SMALLSERIAL PRIMARY KEY,
+            status_type VARCHAR(12) NOT NULL
+        );
         
         CREATE TABLE IF NOT EXISTS core.Default_Config (
-            default_config_id SERIAL PRIMARY KEY,
-            config_key VARCHAR(32) NOT NULL,
+            default_config_id SMALLSERIAL PRIMARY KEY,
+            config_key VARCHAR(30) NOT NULL,
             config_value VARCHAR NULL
         );
 
         CREATE TABLE IF NOT EXISTS core.Guild_Config (
             guild_config_id SERIAL PRIMARY KEY,
             guild_id INTEGER NOT NULL,
-            config_key VARCHAR(32) NOT NULL,
+            config_key VARCHAR(30) NOT NULL,
             config_value VARCHAR NULL
         );
 
