@@ -13,7 +13,7 @@ def db():
         yield conn, cur
     finally:
         cur.close()
-        db.putconn(conn)
+        db_pool.putconn(conn)
 
 def setup():
     with db() as (conn, cur):
