@@ -6,11 +6,6 @@ def setup():
         conn = psycopg2.connect(settings.DATABASE_URL, sslmode="require")
         cur = conn.cursor()
         query = """CREATE SCHEMA IF NOT EXISTS core;
-
-        CREATE TABLE IF NOT EXISTS core.Activity_Type (
-            custom_status_type_id SMALLSERIAL PRIMARY KEY,
-            status_type VARCHAR(12) NOT NULL
-        );
         
         CREATE TABLE IF NOT EXISTS core.Default_Config (
             default_config_id SMALLSERIAL PRIMARY KEY,
@@ -74,5 +69,5 @@ def delete_config_record(key):
 def get_inactive_members():
     return
 
-def update_inactive_members():
+def update_inactive_members(guild_id):
     return
