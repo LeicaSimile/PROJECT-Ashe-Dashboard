@@ -69,11 +69,12 @@ def delete_config_record(key):
 
 def get_all_inactive_members(guild_id):
     inactive_members = []
+    conn = None
     try:
         conn = psycopg2.connect(settings.DATABASE_URL, sslmode="require")
         cur = conn.cursor()
-        query = sql.SQL(f"""SELECT guild_id, member_id, last_notified, is_exempt
-            FROM core.Inactive_Member WHERE guild_id = ${guild_id}""")
+        query = sql.SQL("""SELECT guild_id, member_id, last_notified, is_exempt
+            FROM core.Inactive_Member WHERE guild_id = {}""".format(guild_id))
         cur.execute(query)
         inactive_members = cur.fetchall()
     finally:
