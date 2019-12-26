@@ -1,11 +1,22 @@
+from contextlib import contextmanager
 import psycopg2
-from psycopg2 import sql
+from psycopg2 import pool, sql
 from main import settings
 
-def setup():
+db_pool = pool.SimpleConnectionPool(1, 10, dsn=settings.DATABASE_URL, sslmode="require")
+
+@contextmanager
+def db():
+    conn = db_pool.getconn()
+    cur = conn.cursor()
     try:
-        conn = psycopg2.connect(settings.DATABASE_URL, sslmode="require")
-        cur = conn.cursor()
+        yield conn, cur
+    finally:
+        cur.close()
+        db.putconn(conn)
+
+def setup():
+    with db() as (conn, cur):
         query = """CREATE SCHEMA IF NOT EXISTS core;
         
         CREATE TABLE IF NOT EXISTS core.Default_Config (
@@ -50,10 +61,6 @@ def setup():
         """
         cur.execute(query)
         conn.commit()
-    finally:
-        if conn:
-            cur.close()
-            conn.close()
 
 def add_config_record(key, value):
     return
@@ -69,18 +76,11 @@ def delete_config_record(key):
 
 def get_all_inactive_members(guild_id):
     inactive_members = []
-    conn = None
-    try:
-        conn = psycopg2.connect(settings.DATABASE_URL, sslmode="require")
-        cur = conn.cursor()
+    with db() as (conn, cur):
         query = sql.SQL("""SELECT guild_id, member_id, last_notified, is_exempt
             FROM core.Inactive_Member WHERE guild_id = {}""".format(guild_id))
         cur.execute(query)
         inactive_members = cur.fetchall()
-    finally:
-        if conn:
-            cur.close()
-            conn.close()
 
     return inactive_members
 
