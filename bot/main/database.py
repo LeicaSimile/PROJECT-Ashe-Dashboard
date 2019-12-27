@@ -5,6 +5,16 @@ from main import settings
 
 db_pool = pool.SimpleConnectionPool(1, 10, dsn=settings.DATABASE_URL, sslmode="require")
 
+
+class InactiveMember():
+    def __init__(self, guild_id, member_id, last_notified=None, is_exempt=False):
+        self.guild_id = guild_id
+        self.member_id = member_id
+        self.last_notified = last_notified
+        self.is_exempt = is_exempt
+        self.user = None
+
+
 @contextmanager
 def db():
     conn = db_pool.getconn()
@@ -75,12 +85,25 @@ def delete_config_record(key):
     return
 
 def get_all_inactive_members(guild_id):
+    """Gets all inactive members within a guild.
+
+    Args:
+        guild_id(int): Guild ID according to Discord API.
+    
+    Returns:
+        dict: Dictionary of inactive members within specified guild {member_id: InactiveMember}.
+
+    """
     inactive_members = []
+    results = []
     with db() as (conn, cur):
         query = sql.SQL("""SELECT guild_id, member_id, last_notified, is_exempt
             FROM core.Inactive_Member WHERE guild_id = {}""".format(guild_id))
         cur.execute(query)
-        inactive_members = cur.fetchall()
+        results = cur.fetchall()
+    
+    if results:
+        inactive_members = {r[1]: InactiveMember(r[0], r[1], r[2], r[3]) for r in results}
 
     return inactive_members
 
@@ -88,13 +111,26 @@ def get_inactive_members(guild_id):
     return
 
 def get_exempt_inactive_members(guild_id):
+    """Gets inactive members that are exempt and excused within a guild.
+    
+    Args:
+        guild_id(int): Guild ID according to Discord API.
+    
+    Returns:
+        dict: Dictionary of exempt, inactive members within specified guild {member_id: InactiveMember}.
+
+    """
     inactive_members = []
+    results = []
     with db() as (conn, cur):
         query = sql.SQL("""SELECT guild_id, member_id, last_notified, is_exempt
             FROM core.Inactive_Member WHERE guild_id = {} AND is_exempt = true""".format(guild_id)
         )
         cur.execute(query)
-        inactive_members = cur.fetchall()
+        results = cur.fetchall()
+
+    if results:
+        inactive_members = {r[1]: InactiveMember(r[0], r[1], r[2], r[3]) for r in results}
 
     return inactive_members
 
@@ -102,6 +138,13 @@ def update_inactive_member(guild_id, member_id, **kwargs):
     return
 
 def add_inactive_member(guild_id, member_id):
+    """Adds an inactive member record to the database.
+
+    Args:
+        guild_id(int): Guild ID according to Discord API.
+        member_id(int): Member ID according to Discord API.
+    
+    """
     with db() as (conn, cur):
         try:
             query = sql.SQL("""INSERT INTO core.Inactive_Member
@@ -113,4 +156,18 @@ def add_inactive_member(guild_id, member_id):
             print(e.diag.message_primary)
             conn.rollback()
             
+    return
+
+def remove_inactive_member(guild_id, member_id):
+    with db() as (conn, cur):
+        try:
+            query = sql.SQL("""DELETE FROM core.Inactive_Member
+                WHERE guild_id = {} AND member_id = {}""".format(guild_id, member_id)
+            )
+            cur.execute(query)
+            conn.commit()
+        except psycopg2.DatabaseError as e:
+            print(e.diag.message_primary)
+            conn.rollback()
+
     return
