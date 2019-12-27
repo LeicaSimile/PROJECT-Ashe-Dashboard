@@ -56,7 +56,7 @@ def setup():
             guild_id INTEGER NOT NULL,
             member_id INTEGER NOT NULL,
             last_notified TIMESTAMPTZ NULL,
-            is_exempt BOOLEAN NOT NULL
+            is_exempt BOOLEAN NOT NULL DEFAULT false
         );
         """
         cur.execute(query)
@@ -88,10 +88,29 @@ def get_inactive_members(guild_id):
     return
 
 def get_exempt_inactive_members(guild_id):
-    return
+    inactive_members = []
+    with db() as (conn, cur):
+        query = sql.SQL("""SELECT guild_id, member_id, last_notified, is_exempt
+            FROM core.Inactive_Member WHERE guild_id = {} AND is_exempt = true""".format(guild_id)
+        )
+        cur.execute(query)
+        inactive_members = cur.fetchall()
+
+    return inactive_members
 
 def update_inactive_member(guild_id, member_id, **kwargs):
     return
 
 def add_inactive_member(guild_id, member_id):
+    with db() as (conn, cur):
+        try:
+            query = sql.SQL("""INSERT INTO core.Inactive_Member
+                (guild_id, member_id) VALUES ({}, {})""".format(guild_id, member_id)
+            )
+            cur.execute(query)
+            conn.commit()
+        except psycopg2.DatabaseError as e:
+            print(e.diag.message_primary)
+            conn.rollback()
+            
     return
