@@ -92,16 +92,17 @@ class Admin(commands.Cog):
         messaged = "\n".join([f"{m.display_name} ({m.name}#{m.discriminator})" for m in members])
         await context.channel.send(f"Notified the following inactive members: ```{messaged}```")
 
-    async def notify_inactive_members(self, context):
+    async def notify_inactive_members(self, context, members=None):
         if not await validate_access(context, context.message.author):
             return CommandStatus.INVALID
 
         mod_role = discord.utils.find(lambda r: r.id == settings.MOD_ROLE_ID, context.guild.roles)
-        to_notify = await get_inactive_members(context)
-        to_notify = [i.user for i in to_notify]
+        if not members:
+            members = await get_inactive_members(context)
+        members = [i.user for i in members]
         message = f"Hello, we noticed you haven't been active for a while at ***{context.guild.name}***.\n\nWe have a policy of **kicking inactive members**, but if you're taking a break, that's alright. **Just let a moderator *({mod_role.name})* know** and we'll make sure to exempt you.\n\n(Do not reply here. This is an automated message and any replies will be ignored)"
 
-        await self.notify_members(context, to_notify, message)
+        await self.notify_members(context, members, message)
         return CommandStatus.COMPLETED
 
     async def validate_owner(self, context, function_pass, function_fail=None):
@@ -146,7 +147,7 @@ class Admin(commands.Cog):
             await report.edit(content=f"Inactive members (2+ weeks since last message): ```{inactive_list}```")
             await report.clear_reactions()
         else:
-            await self.notify_inactive_members(context)
+            await self.notify_inactive_members(context, inactive_members)
         
         return CommandStatus.COMPLETED
     
