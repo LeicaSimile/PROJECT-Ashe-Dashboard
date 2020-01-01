@@ -7,12 +7,12 @@ db_pool = pool.SimpleConnectionPool(1, 10, dsn=settings.DATABASE_URL, sslmode="r
 
 
 class InactiveMember():
-    def __init__(self, guild_id, member_id, last_notified=None, is_exempt=False):
+    def __init__(self, guild_id, member_id, last_notified=None, is_exempt=False, user=None):
         self.guild_id = guild_id
         self.member_id = member_id
         self.last_notified = last_notified
         self.is_exempt = is_exempt
-        self.user = None
+        self.user = user
 
 
 @contextmanager

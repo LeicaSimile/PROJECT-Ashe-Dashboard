@@ -45,9 +45,11 @@ async def get_inactive_members(context, progress_report=True):
 
     for member in results:
         if member.id in db_inactive_members:
-            inactive_members.append(db_inactive_members[member.id])
+            m = db_inactive_members[member.id]
+            m.user = member
+            inactive_members.append(m)
         else:
-            inactive_members.append(database.InactiveMember(context.guild.id, member.id))
+            inactive_members.append(database.InactiveMember(context.guild.id, member.id, user=member))
     update_inactive_members(db_inactive_members, {m.member_id: m for m in inactive_members})
 
     return inactive_members
