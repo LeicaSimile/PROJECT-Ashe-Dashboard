@@ -122,7 +122,7 @@ class Admin(commands.Cog):
             return CommandStatus.INVALID
 
         inactive_members = await get_inactive_members(context)
-        inactive_list = "\n".join([f"{u.display_name} ({u.name}#{u.discriminator})" for u in inactive_members])
+        inactive_list = "\n".join([f"{i.user.display_name} ({i.user.name}#{i.user.discriminator})" for i in inactive_members])
         report = await context.channel.send(f"{context.author.mention} Inactive members (2+ weeks since last message): ```{inactive_list}```\nReact below to notify them.")
         await report.add_reaction("📧")
 
@@ -143,6 +143,7 @@ class Admin(commands.Cog):
 
         mod_role = discord.utils.find(lambda r: r.id == settings.MOD_ROLE_ID, context.guild.roles)
         to_notify = await get_inactive_members(context)
+        to_notify = [i.user for i in to_notify]
         message = f"Hello, we noticed you haven't been active for a while at ***{context.guild.name}***.\n\nWe have a policy of **kicking inactive members**, but if you're taking a break, that's alright. **Just let a moderator *({mod_role.name})* know** and we'll make sure to exempt you.\n\n(Do not reply here. This is an automated message and any replies will be ignored)"
 
         await self.notify_members(context, to_notify, message)
