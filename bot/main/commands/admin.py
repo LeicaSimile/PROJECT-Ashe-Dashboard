@@ -414,7 +414,7 @@ class Admin(commands.Cog):
                     "role": 533499454964105245,
                     "channel": "general-chat"
                 }
-            }
+            },
             662365002556243993: {
                 "welcome": {
                     "role": 662376437168472094,
