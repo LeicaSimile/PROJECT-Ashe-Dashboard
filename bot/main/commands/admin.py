@@ -329,6 +329,13 @@ class Admin(commands.Cog):
         }
         servers = {
             533368376148361216: {
+                "roles": {
+                    5: 533369804334039061,
+                    10: 533369803965071381,
+                    20: 533369912207474706,
+                    30: 533369949591175169,
+                    50: 573702137918390272
+                },
                 "pics-only": {
                     548737482108174337: f"To keep #selfies clean, only posts with pictures are allowed. Feel free to post comments in #general!",
                     538110190902312976: f"To keep #lets-draw clean, only posts with pictures are allowed. Discuss art in #lets-draw-discussion!"
@@ -341,6 +348,12 @@ class Admin(commands.Cog):
                     533377545865789441: f"To keep #general clean, posts with links are put in #memes-links-pics instead!",
                     535908960713310220: f"To keep #nsfw-chat clean, posts with links are put in #nsfw-memes-links-pics instead!"
                 }
+            },
+            662365002556243993: {
+                "roles": {
+                    5: 662394541202079744
+                },
+                "pics-only": {}
             }
         }
         if message.guild:
@@ -353,12 +366,14 @@ class Admin(commands.Cog):
             finally:
                 return
         
-        if user.id == 159985870458322944:  # MEE6 Bot
+        if user.id == 159985870458322944 and context.guild.id in servers:  # MEE6 Bot
             result = re.compile(r"GG <@(?:.+)>, you just advanced to level ([0-9]+)!").match(message.content)
             if result:
                 mentioned = message.mentions[0]
                 level = int(result.group(1))
                 print(f"{mentioned.name} reached level {level}")
+
+                roles = servers[context.guild.id].get("roles")
                 for r in roles:
                     if level >= r:
                         role = discord.utils.get(message.guild.roles, id=roles[r])
@@ -393,17 +408,41 @@ class Admin(commands.Cog):
     
     @commands.Cog.listener()
     async def on_member_update(self, before, after):
-        if after.guild.id == 533368376148361216:
+        servers = {
+            533368376148361216: {
+                "welcome": {
+                    "role": 533499454964105245,
+                    "channel": "general-chat"
+                }
+            }
+            662365002556243993: {
+                "welcome": {
+                    "role": 662376437168472094,
+                    "channel": "general-chat"
+                }
+            }
+        }
+
+        if after.guild.id in servers:
             before_roles = [r.id for r in before.roles]
             after_roles = [r.id for r in after.roles]
-            if 533499454964105245 not in before_roles and 533499454964105245 in after_roles:
+            welcome_info = servers[after.guild.id]["welcome"]
+            if welcome_info[role] not in before_roles and welcome_info[role] in after_roles:
+                welcome_channel = discord.utils.get(after.guild.channels, name=welcome_info[channel])
+                
                 # Say welcome message
-                welcome_channel = discord.utils.get(after.guild.channels, name="general-chat")
-                roles_channel = discord.utils.get(after.guild.channels, name="choose-roles")
-                help_channel = discord.utils.get(after.guild.channels, name="help")
-                moderator_role = discord.utils.get(after.guild.roles, id=535886249458794547)
-                await self.bot.say(welcome_channel,
-                    f"Welcome to the server, {after.mention}! Be sure to check out {roles_channel.mention} to find others with similar interests. If you have any questions, feel free to message a moderator ({moderator_role.name}) or post in {help_channel.mention}.")
-            
+                welcome_message = ""
+                if after.guild.id == 533368376148361216:
+                    roles_channel = discord.utils.get(after.guild.channels, name="choose-roles")
+                    help_channel = discord.utils.get(after.guild.channels, name="help")
+                    moderator_role = discord.utils.get(after.guild.roles, id=535886249458794547)
+                    welcome_message = f"Welcome to the server, {after.mention}! Be sure to check out {roles_channel.mention} to find others with similar interests. If you have any questions, feel free to message a moderator ({moderator_role.name}) or post in {help_channel.mention}."
+                elif after.guild.id == 662365002556243993:
+                    intro_channel = discord.utils.get(after.guild.channels, name="introductions")
+                    roles_channel = discord.utils.get(after.guild.channels, name="roles")
+                    welcome_message = f"Greetings, {after.mention}. State thy intro in {intro_channel.mention} and declare thy titles in {roles_channel.mention}."
+
+                await self.bot.say(welcome_channel, welcome_message)
+        
         return
     
