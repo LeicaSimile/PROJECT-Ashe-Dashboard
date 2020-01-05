@@ -427,8 +427,8 @@ class Admin(commands.Cog):
             before_roles = [r.id for r in before.roles]
             after_roles = [r.id for r in after.roles]
             welcome_info = servers[after.guild.id]["welcome"]
-            if welcome_info[role] not in before_roles and welcome_info[role] in after_roles:
-                welcome_channel = discord.utils.get(after.guild.channels, name=welcome_info[channel])
+            if welcome_info["role"] not in before_roles and welcome_info["role"] in after_roles:
+                welcome_channel = discord.utils.get(after.guild.channels, name=welcome_info["channel"])
                 
                 # Say welcome message
                 welcome_message = ""
