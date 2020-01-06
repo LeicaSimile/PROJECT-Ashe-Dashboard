@@ -366,14 +366,14 @@ class Admin(commands.Cog):
             finally:
                 return
         
-        if user.id == 159985870458322944 and context.guild.id in servers:  # MEE6 Bot
+        if user.id == 159985870458322944 and message.guild.id in servers:  # MEE6 Bot
             result = re.compile(r"GG <@(?:.+)>, you just advanced to level ([0-9]+)!").match(message.content)
             if result:
                 mentioned = message.mentions[0]
                 level = int(result.group(1))
                 print(f"{mentioned.name} reached level {level}")
 
-                roles = servers[context.guild.id].get("roles")
+                roles = servers[message.guild.id].get("roles")
                 for r in roles:
                     if level >= r:
                         role = discord.utils.get(message.guild.roles, id=roles[r])
