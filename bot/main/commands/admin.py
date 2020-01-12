@@ -337,7 +337,7 @@ class Admin(commands.Cog):
                     50: 573702137918390272
                 },
                 "pics-only": {
-                    548737482108174337: f"To keep #selfies clean, only posts with pictures are allowed. Feel free to post comments in #general!",
+                    #548737482108174337: f"To keep #selfies clean, only posts with pictures are allowed. Feel free to post comments in #general!",
                     538110190902312976: f"To keep #lets-draw clean, only posts with pictures are allowed. Discuss art in #lets-draw-discussion!"
                 },
                 "no-pics": {
