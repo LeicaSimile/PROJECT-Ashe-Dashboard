@@ -272,7 +272,7 @@ class Admin(commands.Cog):
             )
             await context.channel.send(content="Enter the newly edited message below.", embed=preview)
             try:
-                new_edit = await self.bot.client.wait_for("message", timeout=60, check=check_message)
+                new_edit = await self.bot.client.wait_for("message", timeout=300, check=check_message)
             except asyncio.TimeoutError:
                 await context.channel.send("Time's up.")
                 return CommandStatus.CANCELLED
