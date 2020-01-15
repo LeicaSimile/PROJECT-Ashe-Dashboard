@@ -322,7 +322,7 @@ class Admin(commands.Cog):
                     await edit_base(base_msg, embed, timeout)
 
         preview = discord.Embed(
-            title="Message Preview"
+            title="Message Preview",
             description="DRY BANANA HIPPY HAT"
         )
         base_msg = await context.channel.send(
