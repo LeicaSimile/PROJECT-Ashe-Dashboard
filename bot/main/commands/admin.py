@@ -13,7 +13,12 @@ URL_REGEX = r"""(?i)\b((?:https?:(?:/{1,3}|[a-z0-9%])|[a-z0-9.\-]+[.](?:com|net|
 
 async def validate_access(context, user):
     """Checks if user has permission to use command."""
-    return discord.utils.find(lambda r: r.id in [settings.MOD_ROLE_ID, settings.GUILD_OWNER_ID], user.roles)
+    return context.guild.owner.id == user.id \
+        or user.guild_permissions.administrator \
+        or discord.utils.find(
+            lambda r: r.id in [settings.MOD_ROLE_ID, settings.GUILD_OWNER_ID],
+            user.roles
+        )
 
 async def get_inactive_members(context, progress_report=True):
     """Returns a list of inactive members."""
@@ -131,13 +136,20 @@ class Admin(commands.Cog):
     @commands.command(description="Sends a list of inactive members in the server.")
     async def purgelist(self, context):
         def check(reaction, user):
-            return reaction.message.id == report.id and user == context.message.author and str(reaction.emoji) == "📧"
+            return reaction.message.id == report.id and user.id == context.message.author.id \
+                and str(reaction.emoji) == "📧"
 
         if not await validate_access(context, context.message.author):
             return CommandStatus.INVALID
 
         inactive_members = await get_inactive_members(context)
-        inactive_list = "\n".join([f"{i.user.display_name} ({i.user.name}#{i.user.discriminator})" for i in inactive_members])
+        inactive_list = []
+        for i in inactive_members:
+            last_notified = i.last_notified.strftime(" (%b %d, %Y %Z)") if i.last_notified else ""
+            entry = f"{'**EXEMPT** ' if i.is_exempt}{i.user.mention}{last_notified}"
+            inactive_list.append(entry)
+
+        inactive_list = "\n".join(inactive_list)
         report = await context.channel.send(f"{context.author.mention} Inactive members (2+ weeks since last message): ```{inactive_list}```\nReact below to notify them.")
         await report.add_reaction("📧")
 
@@ -244,7 +256,7 @@ class Admin(commands.Cog):
 
         await context.channel.send("Enter the message ID to be edited:")
         try:
-            message_id = await self.bot.client.wait_for("message", timeout=30, check=check_id)
+            message_id = await self.bot.client.wait_for("message", timeout=300, check=check_id)
             message_id = message_id.content
         except asyncio.TimeoutError:
             await context.channel.send("Time's up.")
@@ -265,7 +277,7 @@ class Admin(commands.Cog):
             return CommandStatus.INVALID
         else:
             preview = discord.Embed(
-                title="Current Message",
+                title="Message Preview",
                 url=to_edit.jump_url,
                 description=discord.utils.escape_markdown(to_edit.content),
                 timestamp=to_edit.edited_at if to_edit.edited_at else to_edit.created_at
@@ -284,6 +296,51 @@ class Admin(commands.Cog):
                     return CommandStatus.FORBIDDEN
                 else:
                     await context.channel.send(f"Message edited: {to_edit.jump_url}")
+
+        return CommandStatus.COMPLETED
+
+    @commands.command()
+    async def test_multiwait(self, context):
+        done = False
+
+        def check_reaction(reaction, user):
+            return reaction.message.id == report.id and user.id == context.message.author.id \
+                and str(reaction.emoji) == "✅"
+
+        async def edit_base(base_msg, embed, timeout):
+            def check_message(msg):
+                return msg.author.id == context.message.author.id and msg.channel.id == context.channel.id
+
+            try:
+                new_edit = await self.bot.client.wait_for("message", timeout=timeout check=check_message)
+            except asyncio.TimeoutError:
+                pass
+            else:
+                if not done:
+                    embed.description = new_edit.clean_content
+                    await base_msg.edit(embed=embed)
+                    await edit_base(base_msg, embed, timeout)
+
+        preview = discord.Embed(
+            title="Message Preview"
+            description="DRY BANANA HIPPY HAT"
+        )
+        base_msg = await context.channel.send(
+            "Type new edits below.\nReact with ✅ to confirm change.", embed=preview
+        )
+        await base_msg.add_reaction("✅")
+
+        timeout = 60
+        await edit_base(base_msg, preview, timeout)
+
+        try:
+            reaction, user = await self.bot.client.wait_for("reaction_add", timeout=timeout, check=check_reaction)
+        except asyncio.TimeoutError:
+            await base_msg.clear_reactions()
+        else:
+            await context.channel.send("All done.")
+        finally:
+            done = True
 
         return CommandStatus.COMPLETED
 

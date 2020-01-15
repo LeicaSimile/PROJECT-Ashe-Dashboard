@@ -1,6 +1,7 @@
 import datetime
 import io
 import os
+import re
 
 import discord
 from discord.ext import commands
@@ -14,6 +15,7 @@ def get_word_frequencies(text):
     fullTermsDict = multidict.MultiDict()
     tempDict = {}
     text = text.lower()
+    text = re.sub(r"[^\w\s]+", "", text)
 
     for word in text.split(" "):
         if len(word) < 3:
