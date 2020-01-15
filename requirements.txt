@@ -4,3 +4,4 @@ wordcloud
 imgurpython
 psycopg2
 pytest
+multidict

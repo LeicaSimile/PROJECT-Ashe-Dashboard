@@ -4,10 +4,27 @@ import os
 
 import discord
 from discord.ext import commands
+import multidict
 from wordcloud import WordCloud
 from matplotlib.image import imread
 
 from main.status import CommandStatus
+
+def get_word_frequencies(text):
+    fullTermsDict = multidict.MultiDict()
+    tempDict = {}
+    text = text.lower()
+
+    for word in text.split(" "):
+        if len(word) < 3:
+            continue
+        val = tempDict.get(word, 0)
+        tempDict[word] = val + 1
+
+    for key in tmpDict:
+        fullTermsDict.add(key, tempDict[key])
+
+    return fullTermsDict
 
 class Fun(commands.Cog):
     """Commands for fun."""
@@ -56,9 +73,10 @@ class Fun(commands.Cog):
             img_mask = imread("wordcloud/mask.png")
             wc = WordCloud(background_color=None, mask=img_mask, contour_width=2, contour_color="white")
         else:
-            wc = WordCloud(width=1000, height=400)
+            wc = WordCloud(width=1000, height=400, max_words=500)
 
-        wc.generate(" ".join(messages))
+        frequencies = get_word_frequencies(" ".join(messages))
+        wc.generate_from_frequencies(frequencies)
         
         wc_dir = f"wordcloud/{context.message.guild.id}"
         os.makedirs(wc_dir, exist_ok=True)
