@@ -146,7 +146,7 @@ class Admin(commands.Cog):
         inactive_list = []
         for i in inactive_members:
             last_notified = i.last_notified.strftime(" (%b %d, %Y %Z)") if i.last_notified else ""
-            entry = f"{'**EXEMPT** ' if i.is_exempt}{i.user.mention}{last_notified}"
+            entry = f"{'**EXEMPT** ' if i.is_exempt else ''}{i.user.mention}{last_notified}"
             inactive_list.append(entry)
 
         inactive_list = "\n".join(inactive_list)
