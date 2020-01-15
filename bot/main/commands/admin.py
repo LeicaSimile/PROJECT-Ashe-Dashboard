@@ -312,7 +312,7 @@ class Admin(commands.Cog):
                 return msg.author.id == context.message.author.id and msg.channel.id == context.channel.id
 
             try:
-                new_edit = await self.bot.client.wait_for("message", timeout=timeout check=check_message)
+                new_edit = await self.bot.client.wait_for("message", timeout=timeout, check=check_message)
             except asyncio.TimeoutError:
                 pass
             else:
