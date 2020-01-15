@@ -150,13 +150,19 @@ class Admin(commands.Cog):
             inactive_list.append(entry)
 
         inactive_list = "\n".join(inactive_list)
-        report = await context.channel.send(f"{context.author.mention} Inactive members (2+ weeks since last message): ```{inactive_list}```\nReact below to notify them.")
+        report_embed = discord.Embed(
+            title="Inactive Members (2+ weeks since last message)",
+            description=inactive_list
+        )
+        report_embed.set_footer(text="React 📧 below to notify them")
+        report = await context.channel.send(f"{context.author.mention}")
         await report.add_reaction("📧")
 
         try:
             reaction, user = await self.bot.client.wait_for("reaction_add", timeout=60, check=check)
         except asyncio.TimeoutError:
-            await report.edit(content=f"Inactive members (2+ weeks since last message): ```{inactive_list}```")
+            report_embed.set_footer(text=discord.Embed.Empty)
+            await report.edit(embed=report_embed)
             await report.clear_reactions()
         else:
             await self.notify_inactive_members(context, inactive_members)
@@ -186,7 +192,7 @@ class Admin(commands.Cog):
 
             await context.channel.send("What's your message?")
             try:
-                message = await self.bot.client.wait_for("message", timeout=60, check=check_message)
+                message = await self.bot.client.wait_for("message", timeout=120, check=check_message)
                 return message.content
             except asyncio.TimeoutError:
                 return False
