@@ -21,7 +21,7 @@ def get_word_frequencies(text):
         val = tempDict.get(word, 0)
         tempDict[word] = val + 1
 
-    for key in tmpDict:
+    for key in tempDict:
         fullTermsDict.add(key, tempDict[key])
 
     return fullTermsDict
