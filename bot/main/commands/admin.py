@@ -155,7 +155,7 @@ class Admin(commands.Cog):
             description=inactive_list
         )
         report_embed.set_footer(text="React 📧 below to notify them")
-        report = await context.channel.send(f"{context.author.mention}")
+        report = await context.channel.send(f"{context.author.mention}", embed=report_embed)
         await report.add_reaction("📧")
 
         try:
