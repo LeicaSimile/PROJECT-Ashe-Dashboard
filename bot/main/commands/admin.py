@@ -105,7 +105,7 @@ class Admin(commands.Cog):
         if not members:
             members = await get_inactive_members(context)
         members = [i.user for i in members]
-        message = f"Hello, we noticed you haven't been active for a while at ***{context.guild.name}***.\n\nWe have a policy of **kicking inactive members**, but if you're taking a break, that's alright. **Just let a moderator *({mod_role.name})* know** and we'll make sure to exempt you.\n\n(Do not reply here. This is an automated message and any replies will be ignored)"
+        message = f"Hello, we noticed you haven't been active for a while at ***{context.guild.name}***.\n\nWe have a policy of **kicking inactive members**, but if you're taking a break, that's alright. **Just let a moderator *(@Moderator)* know** and we'll make sure to exempt you.\n\n(Do not reply here. This is an automated message and any replies will be ignored)"
 
         await self.notify_members(context, members, message)
         return CommandStatus.COMPLETED
