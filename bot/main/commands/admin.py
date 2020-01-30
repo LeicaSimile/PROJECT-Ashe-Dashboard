@@ -511,7 +511,7 @@ class Admin(commands.Cog):
                     intro_channel = discord.utils.get(after.guild.channels, name="introductions")
                     roles_channel = discord.utils.get(after.guild.channels, name="roles")
                     welcome_message = f"Greetings, {after.mention}. State thy intro in {intro_channel.mention} and declare thy titles in {roles_channel.mention}."
-                elif after.guild_id == 670671037343727646:
+                elif after.guild.id == 670671037343727646:
                     roles_channel = discord.utils.get(after.guild.channels, name="roles")
                     welcome_message = f"Welcome to {after.guild.name}, {after.mention}! Grab some {roles_channel.mention} and have fun."
 
