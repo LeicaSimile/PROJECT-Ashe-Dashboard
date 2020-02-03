@@ -503,13 +503,13 @@ class Admin(commands.Cog):
                 # Say welcome message
                 welcome_message = ""
                 if after.guild.id == 533368376148361216:
-                    roles_channel = discord.utils.get(after.guild.channels, name="choose-roles")
-                    help_channel = discord.utils.get(after.guild.channels, name="help")
+                    roles_channel = discord.utils.get(after.guild.channels, id=567027797164425216)
+                    help_channel = discord.utils.get(after.guild.channels, id=615047779701620776)
                     moderator_role = discord.utils.get(after.guild.roles, id=535886249458794547)
                     welcome_message = f"Welcome to the server, {after.mention}! Be sure to check out {roles_channel.mention} to find others with similar interests. If you have any questions, feel free to message a moderator ({moderator_role.name}) or post in {help_channel.mention}."
                 elif after.guild.id == 662365002556243993:
-                    intro_channel = discord.utils.get(after.guild.channels, name="introductions")
-                    roles_channel = discord.utils.get(after.guild.channels, name="roles")
+                    intro_channel = discord.utils.get(after.guild.channels, id=662366496215007257)
+                    roles_channel = discord.utils.get(after.guild.channels, id=662365391968010260)
                     welcome_message = f"Greetings, {after.mention}. State thy intro in {intro_channel.mention} and declare thy titles in {roles_channel.mention}."
                 elif after.guild.id == 670671037343727646:
                     roles_channel = discord.utils.get(after.guild.channels, name="roles")
