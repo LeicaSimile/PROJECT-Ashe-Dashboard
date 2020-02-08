@@ -89,13 +89,23 @@ class Admin(commands.Cog):
         self.bot = bot
 
     async def notify_members(self, context, members, message):
+        success = []
+        failed = []
         for member in members:
-            await member.send(
-                content=message
-            )
+            try:
+                await member.send(content=message)
+            except discord.DiscordException as e:
+                failed.append(member)
+                print(e.message)
+            else:
+                success.append(member)
         
-        messaged = "\n".join([f"{m.display_name} ({m.name}#{m.discriminator})" for m in members])
-        await context.channel.send(f"Notified the following inactive members: ```{messaged}```")
+        if success:
+            messaged = "\n".join([f"{m.display_name} ({m.name}#{m.discriminator})" for m in success])
+            await context.channel.send(f"Notified the following inactive members: ```{messaged}```")
+        if failed:
+            not_messaged = "\n".join([f"{m.display_name} ({m.name}#{m.discriminator})" for m in failed])
+            await context.channel.send(f"Couldn't message the following inactive members: ```{not_messaged}```")
 
     async def notify_inactive_members(self, context, members=None):
         if not await validate_access(context, context.message.author):
