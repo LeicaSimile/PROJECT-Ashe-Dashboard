@@ -54,7 +54,7 @@ class Bot(object):
                     except (discord.Forbidden, discord.HTTPException) as e:
                         self.logger.warning(f"Unable to delete message at {message.jump_url}. {e}")
                     else:
-                        await self.client.say(message.author, f"{custom_message}\nYour message: ```{content}```")
+                        await self.say(message.author, f"{custom_message}\nYour message: ```{content}```")
                         return True
 
                 return False
@@ -192,7 +192,7 @@ class Bot(object):
                         roles_channel = discord.utils.get(after.guild.channels, name="roles")
                         welcome_message = f"Welcome to {after.guild.name}, {after.mention}! Grab some {roles_channel.mention} and have fun."
 
-                    await self.client.say(welcome_channel, welcome_message)
+                    await self.say(welcome_channel, welcome_message)
             
             return
         
