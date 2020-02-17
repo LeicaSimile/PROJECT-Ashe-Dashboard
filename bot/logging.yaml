@@ -50,13 +50,9 @@ loggers:
     level: WARN
     handlers: [root]
 
-  chat:
-    level: INFO
-    handlers: [console, info_file, error_file]
-
   bot:
     level: DEBUG
-    handlers: [debug_file, info_file, error_file]
+    handlers: [debug_file, console, info_file, error_file]
 
   database:
     level: DEBUG

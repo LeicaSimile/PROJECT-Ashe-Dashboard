@@ -20,6 +20,7 @@ class Bot(object):
     
     def __init__(self, logger=None, **options):
         self.logger = logger or logging.getLogger(__name__)
+        self.logger.setLevel(logging.INFO)
         command_prefix = ";"
         description = settings.DESCRIPTION
 
@@ -32,13 +33,9 @@ class Bot(object):
         self.client.run(settings.CLIENT_TOKEN, reconnect=True)
 
     def event_ready(self):
-        """Override on_ready"""
         async def on_ready():
             prefix = ";"
-            self.logger.info(f"{self.client.user.name} is now online.")
-            self.logger.info(f"ID: {self.client.user.id}")
-            self.logger.info(f"Command prefix: {prefix}")
-
+            self.logger.info(f"{self.client.user.name} (ID: {self.client.user.id}) is now online.")
             status = f"DDR | {prefix}help for help"
             await self.client.change_presence(activity=discord.Game(name=status))
 

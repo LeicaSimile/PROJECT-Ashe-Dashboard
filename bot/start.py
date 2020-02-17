@@ -5,7 +5,7 @@ from main.bot import Bot
 logger = logging.getLogger("main")
 
 def main():
-    ashe = Bot()
+    ashe = Bot(logger=logging.getLogger("bot"))
     ashe.run()
 
 
