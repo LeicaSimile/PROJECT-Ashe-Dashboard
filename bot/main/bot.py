@@ -95,12 +95,12 @@ class Bot(object):
                 }
             }
             if message.guild:
-                self.logger.info(f"[{datetime.datetime.now():%H:%M}]({message.guild.name} - {message.channel.name}) {user.name}: {message.content}")
+                self.logger.info(f"({message.guild.name} - {message.channel.name}) {user.name}: {message.content}")
             else:
                 try:
-                    self.logger.info(f"[{datetime.datetime.now():%H:%M}]({message.channel.name}) {user.name}: {message.content}")
+                    self.logger.info(f"({message.channel.name}) {user.name}: {message.content}")
                 except AttributeError:
-                    self.logger.info(f"[{datetime.datetime.now():%H:%M}]({user.name}) {message.content}")
+                    self.logger.info(f"({user.name}) {message.content}")
                 finally:
                     return
             
@@ -149,12 +149,12 @@ class Bot(object):
         async def on_message_edit(before, after):
             def log_message(message, content):
                 if message.guild:
-                    self.logger.info(f"[{datetime.datetime.now():%H:%M}]({message.guild.name} - {message.channel.name}){content}")
+                    self.logger.info(f"({message.guild.name} - {message.channel.name}){content}")
                 else:
                     try:
-                        self.logger.info(f"[{datetime.datetime.now():%H:%M}]({message.channel.name}){content}")
+                        self.logger.info(f"({message.channel.name}){content}")
                     except AttributeError:
-                        self.logger.info(f"[{datetime.datetime.now():%H:%M}]({message.author.name}){content}")
+                        self.logger.info(f"({message.author.name}){content}")
 
 
             if before.pinned and not after.pinned:
