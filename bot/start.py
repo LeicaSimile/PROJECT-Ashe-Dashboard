@@ -1,12 +1,18 @@
 # -*- coding: utf-8 -*-
 import logging
 import logging.config
-import os.path
+import os
 import yaml
 from pathlib import Path
 from main.bot import Bot
 
-with open(os.path.join(Path(__file__).parent.absolute(), "logging.yaml"), "r") as f:
+try:
+    os.makedirs("logs")
+except OSError as e:
+    if e.errno != errno.EEXIST:
+        raise
+        
+with open(Path(__file__).parent.joinpath("logging.yaml")), "r") as f:
     log_config = yaml.safe_load(f.read())
 logging.config.dictConfig(log_config)
 
