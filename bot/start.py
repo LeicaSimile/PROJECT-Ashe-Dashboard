@@ -11,8 +11,8 @@ try:
 except OSError as e:
     if e.errno != errno.EEXIST:
         raise
-        
-with open(Path(__file__).parent.joinpath("logging.yaml")), "r") as f:
+
+with open(Path(__file__).parent.joinpath("logging.yaml"), "r") as f:
     log_config = yaml.safe_load(f.read())
 logging.config.dictConfig(log_config)
 
