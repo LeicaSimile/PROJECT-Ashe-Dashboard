@@ -12,7 +12,7 @@ formatters:
 
 handlers:
   root:
-    class: logging.RotatingFileHandler
+    class: logging.handlers.RotatingFileHandler
     level: WARN
     maxBytes: 10485760 # 10MB
     filename: logs/root.log
@@ -24,7 +24,7 @@ handlers:
     formatter: simple
 
   debug_file:
-    class: logging.RotatingFileHandler
+    class: logging.handlers.RotatingFileHandler
     level: DEBUG
     filename: logs/debug.log
     maxBytes: 10485760 # 10MB
@@ -32,14 +32,14 @@ handlers:
     formatter: detailed
 
   info_file:
-    class: logging.RotatingFileHandler
+    class: logging.handlers.RotatingFileHandler
     level: INFO
     filename: logs/info.log
     maxBytes: 10485760 # 10MB
     formatter: simple
 
   error_file:
-    class: logging.RotatingFileHandler
+    class: logging.handlers.RotatingFileHandler
     level: ERROR
     filename: logs/error.log
     maxBytes: 10485760 # 10MB
