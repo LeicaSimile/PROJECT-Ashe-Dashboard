@@ -5,3 +5,4 @@ imgurpython
 psycopg2
 pytest
 multidict
+pyyaml
