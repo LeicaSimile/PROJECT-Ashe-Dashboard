@@ -163,7 +163,7 @@ class Bot(object):
                 log_message(after, f"<Pinned> {after.author.display_name}: {after.content}")
 
             if before.content != after.content:
-                log_message(after, f"<Old message> {after.author.display_name}: {after.content}")
+                log_message(after, f"<Old message> {after.author.display_name}: {before.content}")
                 log_message(after, f"<Edited> {after.author.display_name}: {after.content}")
 
         return on_message_edit
