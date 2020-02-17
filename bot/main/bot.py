@@ -166,7 +166,7 @@ class Bot(object):
                 log_message(after, f"<Old message> {after.author.display_name}: {after.content}")
                 log_message(after, f"<Edited> {after.author.display_name}: {after.content}")
 
-        return on_edit
+        return on_message_edit
     
     def event_member_update(self):
         async def on_member_update(before, after):
