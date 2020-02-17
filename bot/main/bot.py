@@ -144,6 +144,29 @@ class Bot(object):
                         return
                 """
         return on_message
+
+    def event_edit(self):
+        async def on_message_edit(before, after):
+            def log_message(message, content):
+                if message.guild:
+                    self.logger.info(f"[{datetime.datetime.now():%H:%M}]({message.guild.name} - {message.channel.name}){content}")
+                else:
+                    try:
+                        self.logger.info(f"[{datetime.datetime.now():%H:%M}]({message.channel.name}){content}")
+                    except AttributeError:
+                        self.logger.info(f"[{datetime.datetime.now():%H:%M}]({message.author.name}){content}")
+
+
+            if before.pinned and not after.pinned:
+                log_message(after, f"<Unpinned> {after.author.display_name}: {after.content}")
+            elif not before.pinned and after.pinned:
+                log_message(after, f"<Pinned> {after.author.display_name}: {after.content}")
+
+            if before.content != after.content:
+                log_message(after, f"<Old message> {after.author.display_name}: {after.content}")
+                log_message(after, f"<Edited> {after.author.display_name}: {after.content}")
+
+        return on_edit
     
     def event_member_update(self):
         async def on_member_update(before, after):
@@ -208,6 +231,7 @@ class Bot(object):
     def set_events(self, *events):
         self.client.event(self.event_ready())
         self.client.event(self.event_message())
+        self.client.event(self.event_edit())
         self.client.event(self.event_member_update())
 
         for e in events:
