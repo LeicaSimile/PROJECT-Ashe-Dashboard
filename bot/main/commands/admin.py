@@ -179,6 +179,7 @@ class Admin(commands.Cog):
             inactive_list.append(entry)
 
         inactive_list = "\n".join(inactive_list)
+        self.bot.logger.info(inactive_list)
         report_embed = discord.Embed(
             title="Inactive Members (2+ weeks since last message)",
             description=inactive_list
