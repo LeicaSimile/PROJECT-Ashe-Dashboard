@@ -52,8 +52,12 @@ async def get_inactive_members(context, progress_report=True):
         progress_msg = await context.channel.send(f"Scanning {member_count} members for inactivity.")
 
     for i, member in enumerate(context.guild.members):
-        async for msg in member.history(limit=1, oldest_first=False):
-            if msg.created_at < time_boundary:
+        if member.bot:
+            continue
+        async for msg in member.history(oldest_first=False):
+            if not msg.guild:
+                continue
+            if msg.guild.id == context.guild.id and msg.created_at < time_boundary:
                 senders.append(msg.author)
         
         if progress_msg:
