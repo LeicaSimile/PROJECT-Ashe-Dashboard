@@ -25,8 +25,10 @@ async def get_inactive_members(context, progress_report=True):
     senders = []
     inactive_members = []
     now = datetime.datetime.now()
-    channel_count = len(context.guild.text_channels)
+    time_boundary = now - datetime.timedelta(days=14)
     progress_msg = None
+    """
+    channel_count = len(context.guild.text_channels)
 
     if progress_report:
         progress_msg = await context.channel.send(f"Scanning {channel_count} channels for inactive members.")
@@ -44,6 +46,18 @@ async def get_inactive_members(context, progress_report=True):
     
     if progress_msg:
         await progress_msg.edit(content=f"Scanned {channel_count} channels for inactive members.")
+    """
+    member_count = len(context.guild.members)
+    if progress_report:
+        progress_msg = await context.channel.send(f"Scanning {member_count} members for inactivity.")
+
+    for i, member in enumerate(context.guild.members):
+        async for msg in member.history(limit=1, oldest_first=False):
+            if message.created_at < time_boundary:
+                senders.append(message.author)
+        
+        if progress_msg:
+            await progress_msg.edit(content=f"Scanned {i}/{member_count} members for inactivity.")
     
     results = [u for u in context.guild.members if u not in senders]
     db_inactive_members = database.get_all_inactive_members(context.guild.id)
