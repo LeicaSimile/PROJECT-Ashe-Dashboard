@@ -27,7 +27,7 @@ async def get_inactive_members(context, progress_report=True):
     now = datetime.datetime.now()
     time_boundary = now - datetime.timedelta(days=14)
     progress_msg = None
-    """
+
     channel_count = len(context.guild.text_channels)
 
     if progress_report:
@@ -63,6 +63,7 @@ async def get_inactive_members(context, progress_report=True):
         
         if progress_msg:
             await progress_msg.edit(content=f"Scanned {i}/{member_count} members for inactivity.")
+    """
     
     results = [u for u in context.guild.members if u not in senders]
     db_inactive_members = database.get_all_inactive_members(context.guild.id)
@@ -179,7 +180,7 @@ class Admin(commands.Cog):
             inactive_list.append(entry)
 
         inactive_list = "\n".join(inactive_list)
-        self.bot.logger.info(inactive_list)
+        self.bot.logger.debug(inactive_list)
         report_embed = discord.Embed(
             title="Inactive Members (2+ weeks since last message)",
             description=inactive_list
