@@ -143,6 +143,9 @@ class Bot(object):
                     ):
                         return
                 """
+
+            await self.process_commands(message)
+
         return on_message
 
     def event_edit(self):
