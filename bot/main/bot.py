@@ -144,7 +144,7 @@ class Bot(object):
                         return
                 """
 
-            await self.process_commands(message)
+            await self.client.process_commands(message)
 
         return on_message
 
