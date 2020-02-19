@@ -28,8 +28,8 @@ def get_word_frequencies(text):
 
     return fullTermsDict
 
-class Fun(commands.Cog):
-    """Commands for fun."""
+class Statistics(commands.Cog):
+    """Analyze various statistics related to the server."""
 
     def __init__(self, bot):
         """
