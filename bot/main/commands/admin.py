@@ -116,7 +116,7 @@ class Admin(commands.Cog):
                 await member.send(content=message)
             except discord.DiscordException as e:
                 failed.append(member)
-                print(e.message)
+                print(e.text)
             else:
                 success.append(member)
         
