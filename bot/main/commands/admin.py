@@ -121,11 +121,19 @@ class Admin(commands.Cog):
                 success.append(member)
         
         if success:
-            messaged = "\n".join([f"{m.display_name} ({m.name}#{m.discriminator})" for m in success])
-            await context.channel.send(f"Notified the following inactive members: ```{messaged}```")
+            messaged = "\n".join([f"{m.mention} [{m.display_name}]" for m in success])
+            report_embed = discord.Embed(
+                title="Notified Members",
+                description=messaged
+            )
+            await context.channel.send(embed=report_embed)
         if failed:
-            not_messaged = "\n".join([f"{m.display_name} ({m.name}#{m.discriminator})" for m in failed])
-            await context.channel.send(f"Couldn't message the following inactive members: ```{not_messaged}```")
+            not_messaged = "\n".join([f"{m.mention} [{m.display_name}]" for m in failed])
+            report_embed = discord.Embed(
+                title="Failed to Notify",
+                description=not_messaged
+            )
+            await context.channel.send(f"Couldn't message the following inactive members:", embed=report_embed)
 
     async def notify_inactive_members(self, context, members=None):
         if not await validate_access(context, context.message.author):
