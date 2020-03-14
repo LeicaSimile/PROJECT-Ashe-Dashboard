@@ -144,7 +144,9 @@ class Admin(commands.Cog):
             members = await get_inactive_members(context)
         members = [i.user for i in members]
         message = f"Hello, we noticed you haven't been active for a while at ***{context.guild.name}***.\n\nWe have a policy of **kicking inactive members**, but if you're taking a break, that's alright. **Just let a moderator *(@Moderator)* know** and we'll make sure to exempt you.\n\n(Do not reply here. This is an automated message and any replies will be ignored)"
-
+        if context.guild.id == 533368376148361216:  # LMF
+            message = f"Hello, you have been kicked for inactivity at ***{context.guild.name}***. Don't worry though, you're welcome back anytime! Just message `{context.guild.owner.name}#{context.guild.owner.discriminator}` for an invite back."
+        
         await self.notify_members(context, members, message)
         return CommandStatus.COMPLETED
 
@@ -198,7 +200,7 @@ class Admin(commands.Cog):
         await report.add_reaction("📧")
 
         try:
-            reaction, user = await self.bot.client.wait_for("reaction_add", timeout=60, check=check)
+            reaction, user = await self.bot.client.wait_for("reaction_add", timeout=300, check=check)
         except asyncio.TimeoutError:
             report_embed.set_footer(text=discord.Embed.Empty)
             await report.edit(embed=report_embed)
