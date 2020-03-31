@@ -214,6 +214,20 @@ class Admin(commands.Cog):
     async def purgenotify(self, context):
         await self.notify_inactive_members(context)
 
+    @commands.command(description="")
+    async def exempt(self, context):
+        if not await validate_access(context, context.message.author):
+            return CommandStatus.INVALID
+
+        args = context.message.split(maxsplit=2)
+        cmd_type = args[1].lower()
+        if cmd_type == "add":
+            pass
+        elif cmd_type == "remove":
+            pass
+        elif cmd_type == "list":
+            pass
+
     @commands.command(description="Send a message through me.")
     async def message(self, context):
         async def get_destination(context):

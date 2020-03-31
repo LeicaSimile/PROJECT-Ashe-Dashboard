@@ -65,8 +65,13 @@ def setup():
             inactive_member_id SERIAL PRIMARY KEY,
             guild_id INTEGER NOT NULL,
             member_id INTEGER NOT NULL,
-            last_notified TIMESTAMPTZ NULL,
-            is_exempt BOOLEAN NOT NULL DEFAULT false
+            last_notified TIMESTAMPTZ NULL
+        );
+
+        CREATE TABLE IF NOT EXISTS core.Exemption (
+            exempt_member_id SERIAL PRIMARY KEY,
+            guild_id INTEGER NOT NULL,
+            member_id INTEGER NOT NULL
         );
         """
         cur.execute(query)
@@ -110,30 +115,6 @@ def get_all_inactive_members(guild_id):
 def get_inactive_members(guild_id):
     return
 
-def get_exempt_inactive_members(guild_id):
-    """Gets inactive members that are exempt and excused within a guild.
-    
-    Args:
-        guild_id(int): Guild ID according to Discord API.
-    
-    Returns:
-        dict: Dictionary of exempt, inactive members within specified guild {member_id: InactiveMember}.
-
-    """
-    inactive_members = []
-    results = []
-    with db() as (conn, cur):
-        query = sql.SQL("""SELECT guild_id, member_id, last_notified, is_exempt
-            FROM core.Inactive_Member WHERE guild_id = {} AND is_exempt = true""".format(guild_id)
-        )
-        cur.execute(query)
-        results = cur.fetchall()
-
-    if results:
-        inactive_members = {r[1]: InactiveMember(r[0], r[1], r[2], r[3]) for r in results}
-
-    return inactive_members
-
 def update_inactive_member(guild_id, member_id, **kwargs):
     return
 
@@ -162,6 +143,57 @@ def remove_inactive_member(guild_id, member_id):
     with db() as (conn, cur):
         try:
             query = sql.SQL("""DELETE FROM core.Inactive_Member
+                WHERE guild_id = {} AND member_id = {}""".format(guild_id, member_id)
+            )
+            cur.execute(query)
+            conn.commit()
+        except psycopg2.DatabaseError as e:
+            print(e.diag.message_primary)
+            conn.rollback()
+
+    return
+
+def get_exemptions(guild_id):
+    """Gets members that are exempt and excused within a guild.
+    
+    Args:
+        guild_id(int): Guild ID according to Discord API.
+    
+    Returns:
+        list: Collection of exempt member IDs within specified guild.
+
+    """
+    exemptions = []
+    with db() as (conn, cur):
+        query = sql.SQL("""SELECT member_id
+            FROM core.Exemption WHERE guild_id = {}""".format(guild_id)
+        )
+        cur.execute(query)
+        exemptions = cur.fetchall()
+    
+    if exemptions:
+        exemptions = [e[0] for e in exemptions]
+
+    return exemptions
+
+def add_exemption(guild_id, member_id):
+    with db() as (conn, cur):
+        try:
+            query = sql.SQL("""INSERT INTO core.Exemption
+                (guild_id, member_id) VALUES ({}, {})""".format(guild_id, member_id)
+            )
+            cur.execute(query)
+            conn.commit()
+        except psycopg2.DatabaseError as e:
+            print(e.diag.message_primary)
+            conn.rollback()
+    
+    return
+
+def remove_exemption(guild_id, member_id):
+    with db() as (conn, cur):
+        try:
+            query = sql.SQL("""DELETE FROM core.Exemption
                 WHERE guild_id = {} AND member_id = {}""".format(guild_id, member_id)
             )
             cur.execute(query)
