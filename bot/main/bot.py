@@ -36,8 +36,8 @@ class Bot(object):
         async def on_ready():
             prefix = ";"
             self.logger.info(f"{self.client.user.name} (ID: {self.client.user.id}) is now online.")
-            status = f"DDR | {prefix}help for help"
-            await self.client.change_presence(activity=discord.Game(name=status))
+            status = "Maintenance mode"#"i've got big plans, i've got surprises for today" #f"DDR | {prefix}help for help"
+            await self.client.change_presence(activity=discord.CustomActivity(name=status))#discord.Game(name=status))
 
         return on_ready
 
