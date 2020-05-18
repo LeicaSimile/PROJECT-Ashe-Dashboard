@@ -1,7 +1,7 @@
 import { NgModule, ModuleWithProviders } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { UserService } from './_services/user.service';
 import { BotService } from './_services/bot.service';
+import { DiscordService } from './_services/discord.service';
 
 @NgModule({
   declarations: [],
@@ -14,8 +14,8 @@ export class SharedModule {
     return {
       ngModule: SharedModule,
       providers: [
-        UserService,
-        BotService
+        BotService,
+        DiscordService
       ]
     }
   }
