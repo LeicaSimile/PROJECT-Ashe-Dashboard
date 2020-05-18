@@ -1,17 +1,16 @@
 import { NgModule } from '@angular/core';
 import { Routes, RouterModule } from '@angular/router';
-import { HomeComponent } from './home.component';
+import { CoreComponent } from './_modules/core/core.component';
 
 
 const routes: Routes = [
   {
     path: '',
-    component: HomeComponent,
+    component: CoreComponent,
     pathMatch: 'full'
-  },
-  {
-    path: 'client',
-    loadChildren: () => import('./features/client/client.module').then(m => m.ClientModule)
+  }, {
+    path: '**',
+    component: CoreComponent
   }
 ];
 

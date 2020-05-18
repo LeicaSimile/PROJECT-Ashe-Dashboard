@@ -1,16 +1,80 @@
 /* You can add global styles to this file, and also import other style files */
 $white: hsl(0, 0, 96);
-$blue-background: hsl(230, 70, 20);
-$blue-background-darker: hsl(240, 80, 10);
-$blue-background-lighter: hsl(220, 60, 25);
+$main-background: hsl(230, 30, 20);
+$main-background-darker: hsl(240, 40, 8);
+$main-background-lighter: hsl(220, 25, 25);
 $blue-primary: hsl(190, 80, 48);
 
 $text: $white;
 $text-strong: $white;
 $primary: $blue-primary;
-$body-background-color: $blue-background;
+$body-background-color: $main-background;
 @import "../node_modules/bulma/bulma.sass";
+
+
+$duration: .2s;
+$distance: 8px;
+$easeOutBack: cubic-bezier(0.175, 0.885, 0.320, 1.275);
+
+body, html {
+    background: $body-background-color;
+}
 
 main {
     padding-top: 2rem;
 }
+
+.navbar {
+    background: $main-background-darker;
+    padding: 0 1rem;
+}
+
+.nav-text {
+    font-size: 20px;
+    position: relative;
+    text-transform: uppercase;
+    text-decoration: none;
+    padding-bottom: 8px;
+    margin-top: 1.5rem;
+    margin-left: 1em;
+}
+
+.nav-link {
+    color: $grey-light;
+  
+     &:before,
+      &:after {
+          content: '';
+          position: absolute;
+          bottom: 0;
+          left: 0; right: 0;
+          height: 4px;
+          background-color: $primary;
+      }
+      &:before {
+          opacity: 0;
+          transform: translateY(- $distance);
+          transition: transform 0s $easeOutBack, opacity 0s;
+      }
+      &:after {
+          opacity: 0;
+          transform: translateY($distance/2);
+          transition: transform $duration $easeOutBack, opacity $duration;
+      }
+      &:hover,
+      &:focus {
+          color: $primary;
+
+          &:before,
+          &:after {
+              opacity: 1;
+              transform: translateY(0);
+          }
+          &:before {
+              transition: transform $duration $easeOutBack, opacity $duration;
+          }
+          &:after {
+              transition: transform 0s $duration $easeOutBack, opacity 0s $duration;
+          }
+      }
+  }
