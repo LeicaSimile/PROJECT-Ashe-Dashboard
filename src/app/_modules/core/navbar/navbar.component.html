@@ -9,8 +9,11 @@
         <a routerLink="" class="level-item nav-link nav-text">Contact</a>
     </div>
     <div class="level-right">
-        <div class="level-item">
+        <div *ngIf="!app.user" class="level-item">
             <button class="button is-primary is-outlined" (click)="login()">Login</button>
+        </div>
+        <div *ngIf="app.user" class="level-item">
+            <a routerLink="user/dashboard" class="button is-primary is-outlined">Dashboard</a>
         </div>
     </div>
 </nav>
