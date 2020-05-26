@@ -13,8 +13,12 @@ export class NavbarComponent implements OnInit {
   }
 
   login() {
+    const destination = 'https://discord.com/api/oauth2/authorize';
+    const redirect = encodeURIComponent('http://localhost:4200/auth');
+    const scope = encodeURIComponent('identify guilds');
+
     this.router.navigate([`/${this.app.externalUrl}`, {
-      externalUrl: 'https://discord.com/api/oauth2/authorize?client_id=323173717968683019&redirect_uri=http%3A%2F%2Flocalhost%3A4200%2Fuser%2Fdashboard&response_type=code&scope=identify%20guilds'
+      externalUrl: `${destination}?client_id=${this.app.CLIENT_ID}&redirect_uri=${redirect}&response_type=code&scope=${scope}`
     }], {
       skipLocationChange: true
     });
