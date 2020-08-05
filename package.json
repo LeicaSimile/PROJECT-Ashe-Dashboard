@@ -29,7 +29,7 @@
     "@angular/router": "~8.2.9",
     "angular-oauth2-oidc": "^9.2.2",
     "bulma": "^0.8.0",
-    "fastify": "^2.10.0",
+    "fastify": "^2.15.1",
     "fastify-static": "^2.5.0",
     "rxjs": "~6.4.0",
     "tslib": "^1.10.0",
